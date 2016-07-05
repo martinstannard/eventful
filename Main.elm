@@ -2,71 +2,161 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.App exposing (..)
--- import Html.Attributes exposing (..)
--- import Html.Events exposing (on)
--- import Json.Decode as Json exposing ((:=))
--- import Mouse exposing (Position)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Http
+import Json.Decode as Json exposing (string, int, list)
+import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
+import Task
+
 
 main : Program Never
 main =
-  Html.App.program
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
-    }
+    Html.App.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
 
-type Msg =
-  Noop
+
+type Msg
+    = Noop
+    | GetEvents
+    | FetchSucceed (List Event)
+    | FetchFail Http.Error
+    | UpdateStudentId String
+
 
 type alias Progress =
-  { map : Int
-  , position : String
-  , activity: Int
-  , placement_test: Bool
-  }
+    { map : Int
+    , position : String
+    , activity : Int
+    , placement_test : Bool
+    }
+
 
 type alias Event =
-  { student_id : Int
-  , event_type : String
-  , precinct: String
-  }
+    { student_id : Int
+    , event_type : String
+    , precinct : String
+    , lesson :
+        Int
+        -- , activity : Int
+        -- , quiz : Int
+    }
+
 
 type alias Thing =
-  { event : Event
-  , progress : Progress
-  }
+    { event : Event
+    , progress : Progress
+    }
+
 
 type alias Model =
-  List Thing
+    { events : List Event
+    , studentId : String
+    }
 
-p1 = { map = 1, position = "1", activity = 1, placement_test = False }
-e1 = { student_id = 1, event_type = "CompleteLesson", precinct = "lessons"}
 
-init : (Model, Cmd Msg)
+initialModel : { events : List Event, studentId : String }
+initialModel =
+    { events = []
+    , studentId = "1"
+    }
+
+
+init : ( Model, Cmd Msg )
 init =
-  (
-   [{ event = e1, progress = p1 }]
-   , Cmd.none
-   )
+    ( initialModel
+    , Cmd.none
+    )
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  (model, Cmd.none)
+    case msg of
+        GetEvents ->
+            { model | events = [] } ! [ loadEvents model.studentId ]
+
+        FetchSucceed events ->
+            ( { model | events = events }, Cmd.none )
+
+        FetchFail error ->
+            ( model, Cmd.none )
+
+        UpdateStudentId id ->
+            ( { model | studentId = id }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
 
 subscriptions : a -> Sub Msg
 subscriptions thing =
-  Sub.none
+    Sub.none
 
-view : Model -> Html b
+
+view : Model -> Html Msg
 view model =
-  div []
-      (List.map eventView model)
+    div []
+        [ input
+            [ placeholder "id"
+            , value model.studentId
+            , autofocus True
+            , onInput UpdateStudentId
+            ]
+            []
+        , button [ onClick GetEvents ] [ text "Get Events!" ]
+        , br [] []
+        , eventTable model.events
+        ]
 
-eventView : Thing -> Html b
-eventView thing =
-  div
-    []
-    [span [] [text (toString thing.event.student_id)]
-    ,span [] [text thing.event.precinct]
-    ,span [] [text thing.event.event_type]]
+
+eventTable : List Event -> Html b
+eventTable events =
+    table []
+        [ thead []
+            [ tr []
+                [ th [] [ text "Student" ]
+                , th [] [ text "Precinct" ]
+                , th [] [ text "Event Type" ]
+                , th [] [ text "Lesson" ]
+                ]
+            ]
+        , tbody []
+            (List.map eventView events)
+        ]
+
+
+eventView : Event -> Html b
+eventView event =
+    tr []
+        [ td [] [ text (toString event.student_id) ]
+        , td [] [ text event.precinct ]
+        , td [] [ text event.event_type ]
+        , td [] [ text (toString event.lesson) ]
+        ]
+
+
+loadEvents : String -> Cmd Msg
+loadEvents studentId =
+    let
+        url =
+            "//localhost:3000/events/?student_id=" ++ studentId
+    in
+        Task.perform FetchFail FetchSucceed (Http.get decodeEvents url)
+
+
+decodeEvent : Json.Decoder Event
+decodeEvent =
+    decode Event
+        |> JsonPipeline.required "student_id" int
+        |> JsonPipeline.required "precinct" string
+        |> JsonPipeline.required "event_type" string
+        |> JsonPipeline.required "lesson" int
+
+
+decodeEvents : Json.Decoder (List Event)
+decodeEvents =
+    Json.list decodeEvent

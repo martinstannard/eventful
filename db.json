@@ -1,0 +1,8 @@
+{
+  "events": [
+    { "id": 1, "student_id": 1, "lesson": 1, "precinct": "lessons", "event_type": "CompleteLesson" },
+    { "id": 2, "student_id": 1, "lesson": 2, "precinct": "lessons", "event_type": "CompleteLesson" },
+    { "id": 3, "student_id": 1, "lesson": 3, "precinct": "lessons", "event_type": "CompleteLesson" },
+    { "id": 3, "student_id": 2, "lesson": 1, "precinct": "lessons", "event_type": "CompleteLesson" }
+  ]
+}
