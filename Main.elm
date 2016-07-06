@@ -5,7 +5,7 @@ import Html.App exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode as Json exposing (string, int, list)
+import Json.Decode as Json exposing (string, int, bool, list, tuple2, keyValuePairs, object2, dict)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
 
@@ -23,45 +23,44 @@ main =
 type Msg
     = Noop
     | GetEvents
-    | FetchSucceed (List Event)
+    | FetchSucceed (List Quanta)
     | FetchFail Http.Error
     | UpdateStudentId String
 
 
 type alias Progress =
-    { map : Int
-    , position : String
-    , activity : Int
-    , placement_test : Bool
-    }
+      { map : Int
+      , position : String
+      , activity : Int
+      , placement_test : Bool
+      }
 
 
 type alias Event =
     { student_id : Int
     , event_type : String
     , precinct : String
-    , lesson :
-        Int
+    , lesson : Int
         -- , activity : Int
         -- , quiz : Int
     }
 
 
-type alias Thing =
-    { event : Event
-    , progress : Progress
+type alias Quanta =
+    { progress : Progress
+    , event : Event
     }
 
 
 type alias Model =
-    { events : List Event
+    { quantas : List Quanta
     , studentId : String
     }
 
 
-initialModel : { events : List Event, studentId : String }
+initialModel : { quantas : List Quanta, studentId : String }
 initialModel =
-    { events = []
+    { quantas = []
     , studentId = "1"
     }
 
@@ -77,10 +76,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetEvents ->
-            { model | events = [] } ! [ loadEvents model.studentId ]
+            { model | quantas = [] } ! [ loadEvents model.studentId ]
 
-        FetchSucceed events ->
-            ( { model | events = events }, Cmd.none )
+        FetchSucceed quantas ->
+            ( { model | quantas = quantas }, Cmd.none )
 
         FetchFail error ->
             ( model, Cmd.none )
@@ -109,9 +108,34 @@ view model =
             []
         , button [ onClick GetEvents ] [ text "Get Events!" ]
         , br [] []
-        , eventTable model.events
+        , quantaTable model.quantas
         ]
 
+
+quantaTable : List Quanta -> Html b
+quantaTable quantas =
+  table []
+          [ thead []
+              [ tr []
+                  [ th [] [ text "Student" ]
+                  , th [] [ text "Precinct" ]
+                  , th [] [ text "Event Type" ]
+                  , th [] [ text "Lesson" ]
+                  ]
+              ]
+          , tbody []
+              (List.map quantaView quantas)
+          ]
+
+
+quantaView : Quanta -> Html b
+quantaView quanta =
+  tr []
+        [ td [] [ text (toString quanta.event.student_id) ]
+        , td [] [ text quanta.event.precinct ]
+        , td [] [ text quanta.event.quanta_type ]
+        , td [] [ text (toString quanta.event.lesson) ]
+        ]
 
 eventTable : List Event -> Html b
 eventTable events =
@@ -143,9 +167,19 @@ loadEvents : String -> Cmd Msg
 loadEvents studentId =
     let
         url =
-            "//localhost:3000/events/?student_id=" ++ studentId
+            "//localhost:3000/db"
+          -- "//localhost:3000/events/?student_id=" ++ studentId
     in
-        Task.perform FetchFail FetchSucceed (Http.get decodeEvents url)
+        Task.perform FetchFail FetchSucceed (Http.get decodeQuantas url)
+
+
+decodeProgress : Json.Decoder Progress
+decodeProgress =
+  decode Progress
+    |> JsonPipeline.required "map" int
+    |> JsonPipeline.required "position" string
+    |> JsonPipeline.required "activity" int
+    |> JsonPipeline.required "placement_test" bool
 
 
 decodeEvent : Json.Decoder Event
@@ -156,6 +190,21 @@ decodeEvent =
         |> JsonPipeline.required "event_type" string
         |> JsonPipeline.required "lesson" int
 
+
+decodeQuanta : Json.Decoder (Progress, Event)
+decodeQuanta =
+  -- Json.tuple2 (,) decodeProgress decodeEvent
+      object2 (,)
+          ("progress" := Progress)
+          ("event" := Event)
+  -- dict progress event
+
+
+
+decodeQuantas : Json.Decoder (List Quanta)
+decodeQuantas =
+  -- Json.list decodeQuanta
+  Json.list decodeQuanta
 
 decodeEvents : Json.Decoder (List Event)
 decodeEvents =
