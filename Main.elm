@@ -5,7 +5,7 @@ import Html.App exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode as Json exposing (string, int, bool, list, tuple2, keyValuePairs, object2, dict)
+import Json.Decode as Json exposing ((:=), string, int, bool, list, object2)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
 
@@ -41,7 +41,7 @@ type alias Event =
     , event_type : String
     , precinct : String
     , lesson : Int
-        -- , activity : Int
+    , activity : Int
         -- , quiz : Int
     }
 
@@ -121,6 +121,11 @@ quantaTable quantas =
                   , th [] [ text "Precinct" ]
                   , th [] [ text "Event Type" ]
                   , th [] [ text "Lesson" ]
+                  , th [] [ text "Activity" ]
+                  , th [] [ text "Map" ]
+                  , th [] [ text "Position" ]
+                  , th [] [ text "Activity" ]
+                  , th [] [ text "Placement Test" ]
                   ]
               ]
           , tbody []
@@ -133,35 +138,14 @@ quantaView quanta =
   tr []
         [ td [] [ text (toString quanta.event.student_id) ]
         , td [] [ text quanta.event.precinct ]
-        , td [] [ text quanta.event.quanta_type ]
+        , td [] [ text quanta.event.event_type ]
         , td [] [ text (toString quanta.event.lesson) ]
+        , td [] [ text (toString quanta.event.activity) ]
+        , td [] [ text (toString quanta.progress.map) ]
+        , td [] [ text quanta.progress.position ]
+        , td [] [ text (toString quanta.progress.activity) ]
+        , td [] [ text (toString quanta.progress.placement_test) ]
         ]
-
-eventTable : List Event -> Html b
-eventTable events =
-    table []
-        [ thead []
-            [ tr []
-                [ th [] [ text "Student" ]
-                , th [] [ text "Precinct" ]
-                , th [] [ text "Event Type" ]
-                , th [] [ text "Lesson" ]
-                ]
-            ]
-        , tbody []
-            (List.map eventView events)
-        ]
-
-
-eventView : Event -> Html b
-eventView event =
-    tr []
-        [ td [] [ text (toString event.student_id) ]
-        , td [] [ text event.precinct ]
-        , td [] [ text event.event_type ]
-        , td [] [ text (toString event.lesson) ]
-        ]
-
 
 loadEvents : String -> Cmd Msg
 loadEvents studentId =
@@ -189,23 +173,17 @@ decodeEvent =
         |> JsonPipeline.required "precinct" string
         |> JsonPipeline.required "event_type" string
         |> JsonPipeline.required "lesson" int
+        |> JsonPipeline.required "activity" int
 
 
-decodeQuanta : Json.Decoder (Progress, Event)
+decodeQuanta : Json.Decoder Quanta --(Progress, Event)
 decodeQuanta =
-  -- Json.tuple2 (,) decodeProgress decodeEvent
       object2 (,)
-          ("progress" := Progress)
-          ("event" := Event)
-  -- dict progress event
+          ("progress" := decodeProgress)
+          ("event" := decodeEvent)
 
 
-
-decodeQuantas : Json.Decoder (List Quanta)
+-- decodeQuantas : Json.Decoder (List Quanta)
 decodeQuantas =
-  -- Json.list decodeQuanta
   Json.list decodeQuanta
 
-decodeEvents : Json.Decoder (List Event)
-decodeEvents =
-    Json.list decodeEvent
