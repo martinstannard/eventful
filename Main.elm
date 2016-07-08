@@ -152,8 +152,7 @@ loadEvents : String -> Cmd Msg
 loadEvents studentId =
     let
         url =
-            "//localhost:3000/db"
-          -- "//localhost:3000/events/?student_id=" ++ studentId
+          "//localhost:4000/api/v3/history/" ++ studentId
     in
         Task.perform FetchFail FetchSucceed (Http.get decodeQuantas url)
 
