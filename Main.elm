@@ -3,11 +3,16 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.App exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Http
 import Json.Decode as Json exposing ((:=), string, int, bool, list)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
+import Material
+import Material.Scheme
+import Material.Textfield as Textfield
+import Material.Button as Button
+import Material.Table as Table
+import Material.Options exposing (css)
 
 
 main : Program Never
@@ -26,6 +31,7 @@ type Msg
     | FetchSucceed (List Quanta)
     | FetchFail Http.Error
     | UpdateStudentId String
+    | MDL Material.Msg
 
 
 type alias Progress =
@@ -56,13 +62,15 @@ type alias Quanta =
 type alias Model =
     { quantas : List Quanta
     , studentId : String
+    , mdl : Material.Model
     }
 
 
-initialModel : { quantas : List Quanta, studentId : String }
+initialModel : Model
 initialModel =
     { quantas = []
     , studentId = "1"
+    , mdl = Material.model
     }
 
 
@@ -97,36 +105,52 @@ subscriptions thing =
     Sub.none
 
 
+
+-- VIEW
+
+
+type alias Mdl =
+    Material.Model
+
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ input
-            [ placeholder "id"
-            , value model.studentId
-            , autofocus True
-            , onInput UpdateStudentId
+    div [ style [ ( "padding", "2rem" ) ] ]
+        [ Textfield.render MDL
+            [ 0 ]
+            model.mdl
+            [ Textfield.label "Student Id"
+            , Textfield.floatingLabel
+            , Textfield.value model.studentId
+            , Textfield.onInput UpdateStudentId
             ]
-            []
-        , button [ onClick GetEvents ] [ text "Get Events!" ]
+        , Button.render MDL
+            [ 0 ]
+            model.mdl
+            [ Button.onClick GetEvents
+            , css "margin" "0 24px"
+            ]
+            [ text "Get Events!" ]
         , br [] []
         , quantaTable model.quantas
         ]
+        |> Material.Scheme.top
 
 
 quantaTable : List Quanta -> Html b
 quantaTable quantas =
-    table []
-        [ thead []
-            [ tr []
-                [ th [] [ text "Student" ]
-                , th [] [ text "Precinct" ]
-                , th [] [ text "Event Type" ]
-                , th [] [ text "Lesson" ]
-                , th [] [ text "Activity" ]
-                , th [] [ text "Map" ]
-                , th [] [ text "Position" ]
-                , th [] [ text "Activity" ]
-                , th [] [ text "Placement Test" ]
+    Table.table []
+        [ Table.thead []
+            [ Table.tr []
+                [ Table.th [] [ text "Student" ]
+                , Table.th [] [ text "Precinct" ]
+                , Table.th [] [ text "Event Type" ]
+                , Table.th [] [ text "Lesson" ]
+                , Table.th [] [ text "Activity" ]
+                , Table.th [] [ text "Map" ]
+                , Table.th [] [ text "Position" ]
+                , Table.th [] [ text "Activity" ]
+                , Table.th [] [ text "Placement Test" ]
                 ]
             ]
         , tbody []
@@ -136,16 +160,16 @@ quantaTable quantas =
 
 quantaView : Quanta -> Html b
 quantaView quanta =
-    tr []
-        [ td [] [ text (toString quanta.event.canonical_student_id) ]
-        , td [] [ text quanta.event.precinct ]
-        , td [] [ text quanta.event.event_type ]
-        , td [] [ text (toString quanta.event.lesson) ]
-        , td [] [ text (toString quanta.event.activity) ]
-        , td [] [ text (toString quanta.progress.map) ]
-        , td [] [ text quanta.progress.position ]
-        , td [] [ text (toString quanta.progress.activity) ]
-        , td [] [ text (toString quanta.progress.placement_test) ]
+    Table.tr []
+        [ Table.td [ Table.numeric ] [ text (toString quanta.event.canonical_student_id) ]
+        , Table.td [] [ text quanta.event.precinct ]
+        , Table.td [] [ text quanta.event.event_type ]
+        , Table.td [ Table.numeric ] [ text (toString quanta.event.lesson) ]
+        , Table.td [ Table.numeric ] [ text (toString quanta.event.activity) ]
+        , Table.td [ Table.numeric ] [ text (toString quanta.progress.map) ]
+        , Table.td [] [ text quanta.progress.position ]
+        , Table.td [ Table.numeric ] [ text (toString quanta.progress.activity) ]
+        , Table.td [] [ text (toString quanta.progress.placement_test) ]
         ]
 
 
@@ -177,7 +201,7 @@ decodeEvent =
         |> JsonPipeline.required "event_type" string
         |> JsonPipeline.required "precinct" string
         |> JsonPipeline.required "lesson" int
-        |> JsonPipeline.required "activity" int
+        |> JsonPipeline.optional "activity" int 0
 
 
 decodeQuanta : Json.Decoder Quanta
