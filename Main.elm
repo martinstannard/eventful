@@ -37,7 +37,7 @@ type alias Progress =
 
 
 type alias Event =
-    { student_id : Int
+    { canonical_student_id : Int
     , event_type : String
     , precinct : String
     , lesson : Int
@@ -136,7 +136,7 @@ quantaTable quantas =
 quantaView : Quanta -> Html b
 quantaView quanta =
   tr []
-        [ td [] [ text (toString quanta.event.student_id) ]
+        [ td [] [ text (toString quanta.event.canonical_student_id) ]
         , td [] [ text quanta.event.precinct ]
         , td [] [ text quanta.event.event_type ]
         , td [] [ text (toString quanta.event.lesson) ]
@@ -169,7 +169,7 @@ decodeProgress =
 decodeEvent : Json.Decoder Event
 decodeEvent =
     decode Event
-        |> JsonPipeline.required "student_id" int
+        |> JsonPipeline.required "canonical_student_id" int
         |> JsonPipeline.required "event_type" string
         |> JsonPipeline.required "precinct" string
         |> JsonPipeline.required "lesson" int
