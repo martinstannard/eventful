@@ -5,7 +5,7 @@ import Html.App exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode as Json exposing ((:=), string, int, bool, list, tuple2, keyValuePairs, object2, dict)
+import Json.Decode as Json exposing ((:=), string, int, bool, list)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
 
@@ -29,11 +29,11 @@ type Msg
 
 
 type alias Progress =
-      { map : Int
-      , position : String
-      , activity : Int
-      , placement_test : Bool
-      }
+    { map : Int
+    , position : String
+    , activity : Int
+    , placement_test : Bool
+    }
 
 
 type alias Event =
@@ -41,7 +41,8 @@ type alias Event =
     , event_type : String
     , precinct : String
     , lesson : Int
-    , activity : Int
+    , activity :
+        Int
         -- , quiz : Int
     }
 
@@ -114,28 +115,28 @@ view model =
 
 quantaTable : List Quanta -> Html b
 quantaTable quantas =
-  table []
-          [ thead []
-              [ tr []
-                  [ th [] [ text "Student" ]
-                  , th [] [ text "Precinct" ]
-                  , th [] [ text "Event Type" ]
-                  , th [] [ text "Lesson" ]
-                  , th [] [ text "Activity" ]
-                  , th [] [ text "Map" ]
-                  , th [] [ text "Position" ]
-                  , th [] [ text "Activity" ]
-                  , th [] [ text "Placement Test" ]
-                  ]
-              ]
-          , tbody []
-              (List.map quantaView quantas)
-          ]
+    table []
+        [ thead []
+            [ tr []
+                [ th [] [ text "Student" ]
+                , th [] [ text "Precinct" ]
+                , th [] [ text "Event Type" ]
+                , th [] [ text "Lesson" ]
+                , th [] [ text "Activity" ]
+                , th [] [ text "Map" ]
+                , th [] [ text "Position" ]
+                , th [] [ text "Activity" ]
+                , th [] [ text "Placement Test" ]
+                ]
+            ]
+        , tbody []
+            (List.map quantaView quantas)
+        ]
 
 
 quantaView : Quanta -> Html b
 quantaView quanta =
-  tr []
+    tr []
         [ td [] [ text (toString quanta.event.canonical_student_id) ]
         , td [] [ text quanta.event.precinct ]
         , td [] [ text quanta.event.event_type ]
@@ -152,18 +153,21 @@ loadEvents : String -> Cmd Msg
 loadEvents studentId =
     let
         url =
-          "//localhost:4000/api/v3/history/" ++ studentId
+            "//localhost:4000/api/v3/history/" ++ studentId
+
+        decoder =
+            Json.list decodeQuanta
     in
-        Task.perform FetchFail FetchSucceed (Http.get decodeQuantas url)
+        Task.perform FetchFail FetchSucceed (Http.get decoder url)
 
 
 decodeProgress : Json.Decoder Progress
 decodeProgress =
-  decode Progress
-    |> JsonPipeline.required "map" int
-    |> JsonPipeline.required "position" string
-    |> JsonPipeline.required "activity" int
-    |> JsonPipeline.required "placement_test" bool
+    decode Progress
+        |> JsonPipeline.required "map" int
+        |> JsonPipeline.required "position" string
+        |> JsonPipeline.required "activity" int
+        |> JsonPipeline.required "placement_test" bool
 
 
 decodeEvent : Json.Decoder Event
@@ -178,11 +182,6 @@ decodeEvent =
 
 decodeQuanta : Json.Decoder Quanta
 decodeQuanta =
-  decode Quanta
-    |> JsonPipeline.required "progress" decodeProgress
-    |> JsonPipeline.required "event" decodeEvent
-
-
-decodeQuantas : Json.Decoder (List Quanta)
-decodeQuantas =
-  Json.list decodeQuanta
+    decode Quanta
+        |> JsonPipeline.required "progress" decodeProgress
+        |> JsonPipeline.required "event" decodeEvent
