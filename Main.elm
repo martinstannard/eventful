@@ -47,9 +47,7 @@ type alias Event =
     , event_type : String
     , precinct : String
     , lesson : Int
-    , activity :
-        Int
-        -- , quiz : Int
+    , activity : Int
     }
 
 
@@ -116,7 +114,8 @@ type alias Mdl =
 view : Model -> Html Msg
 view model =
     div [ style [ ( "padding", "2rem" ) ] ]
-        [ Textfield.render MDL
+        [ h4 [] [text "Eventful"]
+        , Textfield.render MDL
             [ 0 ]
             model.mdl
             [ Textfield.label "Student Id"
