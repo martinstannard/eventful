@@ -35,18 +35,18 @@ type Msg
 
 
 type alias Progress =
-    { map : Int
-    , position : String
-    , activity : Int
+    { position : String
     , placement_test : Bool
+    , map : Int
+    , activity : Int
     }
 
 
 type alias Event =
-    { canonical_student_id : Int
-    , event_type : String
-    , precinct : String
+    { precinct : String
     , lesson : Int
+    , event_type : String
+    , canonical_student_id : Int
     , activity : Int
     }
 
