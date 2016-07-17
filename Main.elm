@@ -89,7 +89,10 @@ update msg model =
             ( { model | quantas = quantas }, Cmd.none )
 
         FetchFail error ->
-            ( model, Cmd.none )
+            let
+              d = Debug.log "FetchFail" error
+            in
+              ( model, Cmd.none )
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
@@ -177,6 +180,7 @@ loadEvents studentId =
     let
         url =
           "//ex-seeds.coreos-staging.blakedev.com/api/v3/history/" ++ studentId
+          -- "http://localhost:3000/quantas?event.canonical_student_id=5573423"
 
         decoder =
             Json.list decodeQuanta

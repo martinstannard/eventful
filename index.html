@@ -13006,28 +13006,28 @@ var _martinstannard$sevents$Main$initialModel = {
 var _martinstannard$sevents$Main$init = {ctor: '_Tuple2', _0: _martinstannard$sevents$Main$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 var _martinstannard$sevents$Main$Progress = F4(
 	function (a, b, c, d) {
-		return {map: a, position: b, activity: c, placement_test: d};
+		return {position: a, placement_test: b, map: c, activity: d};
 	});
 var _martinstannard$sevents$Main$decodeProgress = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'placement_test',
-	_elm_lang$core$Json_Decode$bool,
+	'activity',
+	_elm_lang$core$Json_Decode$int,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'activity',
+		'map',
 		_elm_lang$core$Json_Decode$int,
 		A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'position',
-			_elm_lang$core$Json_Decode$string,
+			'placement_test',
+			_elm_lang$core$Json_Decode$bool,
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'map',
-				_elm_lang$core$Json_Decode$int,
+				'position',
+				_elm_lang$core$Json_Decode$string,
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_martinstannard$sevents$Main$Progress)))));
 var _martinstannard$sevents$Main$Event = F5(
 	function (a, b, c, d, e) {
-		return {canonical_student_id: a, event_type: b, precinct: c, lesson: d, activity: e};
+		return {precinct: a, lesson: b, event_type: c, canonical_student_id: d, activity: e};
 	});
 var _martinstannard$sevents$Main$decodeEvent = A4(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$optional,
@@ -13036,20 +13036,20 @@ var _martinstannard$sevents$Main$decodeEvent = A4(
 	0,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'lesson',
+		'canonical_student_id',
 		_elm_lang$core$Json_Decode$int,
 		A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'precinct',
+			'event_type',
 			_elm_lang$core$Json_Decode$string,
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'event_type',
-				_elm_lang$core$Json_Decode$string,
+				'lesson',
+				_elm_lang$core$Json_Decode$int,
 				A3(
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'canonical_student_id',
-					_elm_lang$core$Json_Decode$int,
+					'precinct',
+					_elm_lang$core$Json_Decode$string,
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_martinstannard$sevents$Main$Event))))));
 var _martinstannard$sevents$Main$Quanta = F2(
 	function (a, b) {
@@ -13082,7 +13082,7 @@ var _martinstannard$sevents$Main$FetchSucceed = function (a) {
 };
 var _martinstannard$sevents$Main$loadEvents = function (studentId) {
 	var decoder = _elm_lang$core$Json_Decode$list(_martinstannard$sevents$Main$decodeQuanta);
-	var url = A2(_elm_lang$core$Basics_ops['++'], '//localhost:4000/api/v3/history/', studentId);
+	var url = A2(_elm_lang$core$Basics_ops['++'], '//ex-seeds.coreos-staging.blakedev.com/api/v3/history/', studentId);
 	return A3(
 		_elm_lang$core$Task$perform,
 		_martinstannard$sevents$Main$FetchFail,
@@ -13115,6 +13115,7 @@ var _martinstannard$sevents$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'FetchFail':
+				var d = A2(_elm_lang$core$Debug$log, 'FetchFail', _p0._0);
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'UpdateStudentId':
 				return {
@@ -13143,6 +13144,14 @@ var _martinstannard$sevents$Main$view = function (model) {
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
+					A2(
+					_elm_lang$html$Html$h4,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('Eventful')
+						])),
 					A4(
 					_debois$elm_mdl$Material_Textfield$render,
 					_martinstannard$sevents$Main$MDL,
