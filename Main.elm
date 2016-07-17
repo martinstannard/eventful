@@ -176,7 +176,7 @@ loadEvents : String -> Cmd Msg
 loadEvents studentId =
     let
         url =
-            "//localhost:4000/api/v3/history/" ++ studentId
+          "//ex-seeds.coreos-staging.blakedev.com/api/v3/history/" ++ studentId
 
         decoder =
             Json.list decodeQuanta
