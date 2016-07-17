@@ -135,7 +135,7 @@ view model =
             [ Button.onClick GetEvents
             , css "margin" "0 24px"
             ]
-            [ text "Get Events!" ]
+            [ text "Get History" ]
         , br [] []
         , quantaTable model.quantas
         ]
