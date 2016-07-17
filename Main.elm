@@ -182,7 +182,7 @@ loadEvents : String -> Cmd Msg
 loadEvents studentId =
     let
         url =
-          "https://ex-seeds.coreos-staging.blakedev.com/api/v3/history/" ++ studentId
+          "http://ex-seeds.coreos-staging.blakedev.com/api/v3/history/" ++ studentId
           -- "http://localhost:3000/quantas?event.canonical_student_id=5573423"
 
         decoder =
