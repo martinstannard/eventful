@@ -187,19 +187,19 @@ loadEvents studentId =
 decodeProgress : Json.Decoder Progress
 decodeProgress =
     decode Progress
-        |> JsonPipeline.required "map" int
         |> JsonPipeline.required "position" string
-        |> JsonPipeline.required "activity" int
         |> JsonPipeline.required "placement_test" bool
+        |> JsonPipeline.required "map" int
+        |> JsonPipeline.required "activity" int
 
 
 decodeEvent : Json.Decoder Event
 decodeEvent =
     decode Event
-        |> JsonPipeline.required "canonical_student_id" int
-        |> JsonPipeline.required "event_type" string
         |> JsonPipeline.required "precinct" string
         |> JsonPipeline.required "lesson" int
+        |> JsonPipeline.required "event_type" string
+        |> JsonPipeline.required "canonical_student_id" int
         |> JsonPipeline.optional "activity" int 0
 
 
