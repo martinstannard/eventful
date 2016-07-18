@@ -86,16 +86,10 @@ update msg model =
             { model | quantas = [] } ! [ loadEvents model.studentId ]
 
         FetchSucceed quantas ->
-          let
-            d = Debug.log "FetchSucceed" quantas
-          in
             ( { model | quantas = quantas }, Cmd.none )
 
         FetchFail error ->
-            let
-              d = Debug.log "FetchFail" error
-            in
-              ( model, Cmd.none )
+            ( model, Cmd.none )
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
@@ -152,7 +146,7 @@ quantaTable quantas =
                 , Table.th [] [ text "Event Type" ]
                 , Table.th [] [ text "Lesson" ]
                 , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Map" ]
+                , Table.th [] [ strong [] [ text "Map" ] ]
                 , Table.th [] [ text "Position" ]
                 , Table.th [] [ text "Activity" ]
                 , Table.th [] [ text "Placement Test" ]
@@ -183,7 +177,6 @@ loadEvents studentId =
     let
         url =
           "http://ex-seeds.coreos-staging.blakedev.com/api/v3/history/" ++ studentId
-          -- "http://localhost:3000/quantas?event.canonical_student_id=5573423"
 
         decoder =
             Json.list decodeQuanta
