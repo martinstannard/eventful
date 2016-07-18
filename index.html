@@ -13114,17 +13114,14 @@ var _martinstannard$sevents$Main$update = F2(
 							_martinstannard$sevents$Main$loadEvents(model.studentId)
 						]));
 			case 'FetchSucceed':
-				var _p1 = _p0._0;
-				var d = A2(_elm_lang$core$Debug$log, 'FetchSucceed', _p1);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{quantas: _p1}),
+						{quantas: _p0._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'FetchFail':
-				var d = A2(_elm_lang$core$Debug$log, 'FetchFail', _p0._0);
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'UpdateStudentId':
 				return {

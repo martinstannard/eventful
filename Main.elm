@@ -13,6 +13,7 @@ import Material.Textfield as Textfield
 import Material.Button as Button
 import Material.Table as Table
 import Material.Options exposing (css)
+import List exposing (reverse)
 
 
 main : Program Never
@@ -131,7 +132,7 @@ view model =
             ]
             [ text "Get History" ]
         , br [] []
-        , quantaTable model.quantas
+        , quantaTable (reverse model.quantas)
         ]
         |> Material.Scheme.top
 
@@ -141,12 +142,11 @@ quantaTable quantas =
     Table.table []
         [ Table.thead []
             [ Table.tr []
-                [ Table.th [] [ text "Student" ]
-                , Table.th [] [ text "Precinct" ]
+                [ Table.th [] [ text "Precinct" ]
                 , Table.th [] [ text "Event Type" ]
                 , Table.th [] [ text "Lesson" ]
                 , Table.th [] [ text "Activity" ]
-                , Table.th [] [ strong [] [ text "Map" ] ]
+                , Table.th [] [ text "Map" ]
                 , Table.th [] [ text "Position" ]
                 , Table.th [] [ text "Activity" ]
                 , Table.th [] [ text "Placement Test" ]
@@ -160,15 +160,14 @@ quantaTable quantas =
 quantaView : Quanta -> Html b
 quantaView quanta =
     Table.tr []
-        [ Table.td [ Table.numeric ] [ text (toString quanta.event.canonical_student_id) ]
-        , Table.td [] [ text quanta.event.precinct ]
+        [ Table.td [] [ text quanta.event.precinct ]
         , Table.td [] [ text quanta.event.event_type ]
         , Table.td [ Table.numeric ] [ text (toString quanta.event.lesson) ]
         , Table.td [ Table.numeric ] [ text (toString quanta.event.activity) ]
-        , Table.td [ Table.numeric ] [ text (toString quanta.progress.map) ]
-        , Table.td [] [ text quanta.progress.position ]
-        , Table.td [ Table.numeric ] [ text (toString quanta.progress.activity) ]
-        , Table.td [] [ text (toString quanta.progress.placement_test) ]
+        , Table.td [ Table.numeric ] [ strong [] [ text (toString quanta.progress.map) ] ]
+        , Table.td [] [ strong [] [ text quanta.progress.position ] ]
+        , Table.td [ Table.numeric ] [ strong [] [ text (toString quanta.progress.activity) ] ]
+        , Table.td [] [ strong [] [ text (toString quanta.progress.placement_test) ] ]
         ]
 
 
