@@ -32,7 +32,7 @@ type Msg
     | FetchSucceed (List Quanta)
     | FetchFail Http.Error
     | UpdateStudentId String
-    | MDL Material.Msg
+    | MDL (Material.Msg Msg)
 
 
 type alias Progress =
