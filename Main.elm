@@ -29,7 +29,7 @@ main =
 type Msg
     = Noop
     | GetEvents
-    | FetchSucceed (List Quanta)
+    | FetchSucceed (List Quantum)
     | FetchFail Http.Error
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
@@ -52,14 +52,14 @@ type alias Event =
     }
 
 
-type alias Quanta =
+type alias Quantum =
     { progress : Progress
     , event : Event
     }
 
 
 type alias Model =
-    { quantas : List Quanta
+    { quanta : List Quantum
     , studentId : String
     , mdl : Material.Model
     }
@@ -67,7 +67,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { quantas = []
+    { quanta = []
     , studentId = "1"
     , mdl = Material.model
     }
@@ -84,10 +84,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetEvents ->
-            { model | quantas = [] } ! [ loadEvents model.studentId ]
+            { model | quanta = [] } ! [ loadEvents model.studentId ]
 
-        FetchSucceed quantas ->
-            ( { model | quantas = quantas }, Cmd.none )
+        FetchSucceed quanta ->
+            ( { model | quanta = quanta }, Cmd.none )
 
         FetchFail error ->
             ( model, Cmd.none )
@@ -132,13 +132,13 @@ view model =
             ]
             [ text "Get History" ]
         , br [] []
-        , quantaTable (reverse model.quantas)
+        , quantaTable (reverse model.quanta)
         ]
         |> Material.Scheme.top
 
 
-quantaTable : List Quanta -> Html b
-quantaTable quantas =
+quantaTable : List Quantum -> Html b
+quantaTable quanta =
     Table.table []
         [ Table.thead []
             [ Table.tr []
@@ -153,21 +153,21 @@ quantaTable quantas =
                 ]
             ]
         , tbody []
-            (List.map quantaView quantas)
+            (List.map quantumView quanta)
         ]
 
 
-quantaView : Quanta -> Html b
-quantaView quanta =
+quantumView : Quantum -> Html b
+quantumView quantum =
     Table.tr []
-        [ Table.td [] [ text quanta.event.precinct ]
-        , Table.td [] [ text quanta.event.event_type ]
-        , Table.td [ Table.numeric ] [ text (toString quanta.event.lesson) ]
-        , Table.td [ Table.numeric ] [ text (toString quanta.event.activity) ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString quanta.progress.map) ] ]
-        , Table.td [] [ strong [] [ text quanta.progress.position ] ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString quanta.progress.activity) ] ]
-        , Table.td [] [ strong [] [ text (toString quanta.progress.placement_test) ] ]
+        [ Table.td [] [ text quantum.event.precinct ]
+        , Table.td [] [ text quantum.event.event_type ]
+        , Table.td [ Table.numeric ] [ text (toString quantum.event.lesson) ]
+        , Table.td [ Table.numeric ] [ text (toString quantum.event.activity) ]
+        , Table.td [ Table.numeric ] [ strong [] [ text (toString quantum.progress.map) ] ]
+        , Table.td [] [ strong [] [ text quantum.progress.position ] ]
+        , Table.td [ Table.numeric ] [ strong [] [ text (toString quantum.progress.activity) ] ]
+        , Table.td [] [ strong [] [ text (toString quantum.progress.placement_test) ] ]
         ]
 
 
@@ -204,8 +204,8 @@ decodeEvent =
         |> JsonPipeline.optional "activity" int 0
 
 
-decodeQuanta : Json.Decoder Quanta
-decodeQuanta =
-    decode Quanta
+decodeQuantum : Json.Decoder Quantum
+decodeQuantum =
+    decode Quantum
         |> JsonPipeline.required "progress" decodeProgress
         |> JsonPipeline.required "event" decodeEvent
