@@ -6,8 +6,8 @@ import Html.Attributes exposing (..)
 import Json.Decode as JD exposing ((:=), string, int, bool, list)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Material.Table as Table
-import Event exposing (..)
-import Progress exposing (..)
+import Event exposing (Event, decoder)
+import Progress exposing (Progress, decoder)
 
 
 type Quanta

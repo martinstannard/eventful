@@ -12,9 +12,9 @@ import Material.Button as Button
 import Material.Table as Table
 import Material.Options exposing (css)
 import List exposing (reverse)
-import Event exposing (..)
-import Progress exposing (..)
-import Quanta exposing (..)
+import Event exposing (Event, decoder)
+import Progress exposing (Progress, decoder)
+import Quanta exposing (Quanta, init, decoder, view)
 
 
 main : Program Never
