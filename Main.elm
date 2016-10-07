@@ -15,42 +15,58 @@ import List exposing (reverse)
 import Event exposing (Event, decoder)
 import Progress exposing (Progress, decoder)
 import Quanta exposing (Quanta, init, decoder, view)
+import Navigation
+import Route
+import MainDataType exposing (Msg(..), Page(..), Model)
+
+
+-- Aliases
+
+
+type alias Url =
+    String
+
+
+type alias Mdl =
+    Material.Model
+
+
+
+-- Main program
 
 
 main : Program Never
 main =
-    Html.App.program
+    Navigation.program Route.urlParser
         { init = init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , urlUpdate = Route.urlUpdate
+        , subscriptions = \_ -> Sub.none
         }
 
 
-type Msg
-    = Noop
-    | GetEvents
-    | FetchSucceed Quanta
-    | FetchFail Http.Error
-    | UpdateStudentId String
-    | MDL (Material.Msg Msg)
+init : Url -> ( Model, Cmd Msg )
+init url =
+    let
+        model =
+            { quanta = Quanta.init
+            , studentId = "1"
+            , mdl = Material.model
+            , currentPage = Index
+            }
+
+        mainCmds =
+            Cmd.none
+
+        ( modelWithUrl, urlCmds ) =
+            Route.urlUpdate url model
+    in
+        ( modelWithUrl, Cmd.batch [ mainCmds, urlCmds ] )
 
 
-type alias Model =
-    { quanta : Quanta
-    , studentId : String
-    , mdl : Material.Model
-    }
 
-
-init : ( Model, Cmd Msg )
-init =
-    ( { quanta = Quanta.init
-      , studentId = "1"
-      , mdl = Material.model
-      }
-    , Cmd.none
-    )
+-- Update
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,21 +88,30 @@ update msg model =
             ( model, Cmd.none )
 
 
-subscriptions : a -> Sub Msg
-subscriptions thing =
-    Sub.none
 
-
-
--- VIEW
-
-
-type alias Mdl =
-    Material.Model
+-- View
 
 
 view : Model -> Html Msg
-view model =
+view ({ currentPage } as model) =
+    case currentPage of
+        Index ->
+            indexView model |> Material.Scheme.top
+
+        Settings ->
+            settingsView model |> Material.Scheme.top
+
+
+settingsView : Model -> Html Msg
+settingsView model =
+    div []
+        [ h1 [] [ text "This is the settings page" ]
+        , h5 [] [ text "Add stuff here" ]
+        ]
+
+
+indexView : Model -> Html Msg
+indexView model =
     div [ style [ ( "padding", "2rem" ) ] ]
         [ h4 [] [ text "Eventful" ]
         , Textfield.render MDL
@@ -107,7 +132,6 @@ view model =
         , br [] []
         , Quanta.view model.quanta
         ]
-        |> Material.Scheme.top
 
 
 loadEvents : String -> Cmd Msg
