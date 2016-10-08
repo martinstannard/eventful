@@ -1,4 +1,4 @@
-module Quanta exposing (Quanta, init, decoder, view)
+module Quanta exposing (Model, init, decoder, view)
 
 import Html exposing (..)
 import Html.App exposing (..)
@@ -10,36 +10,36 @@ import Event exposing (Event, decoder)
 import Progress exposing (Progress, decoder)
 
 
-type Quanta
-    = Quanta (List Model)
+type Model
+    = Model (List Quantum)
 
 
-type alias Model =
+type alias Quantum =
     { progress : Progress
     , event : Event
     }
 
 
-init : Quanta
+init : Model
 init =
-    Quanta []
+    Model []
 
 
-decoder : JD.Decoder Quanta
+decoder : JD.Decoder Model
 decoder =
-    decode Model
+    decode Quantum
         |> JsonPipeline.required "progress" Progress.decoder
         |> JsonPipeline.required "event" Event.decoder
         |> JD.list
-        |> JD.map Quanta
+        |> JD.map Model
 
 
 
 -- View
 
 
-view : Quanta -> Html b
-view (Quanta quanta) =
+view : Model -> Html b
+view (Model quanta) =
     Table.table []
         [ Table.thead []
             [ Table.tr []
@@ -58,7 +58,7 @@ view (Quanta quanta) =
         ]
 
 
-rowView : Model -> Html b
+rowView : Quantum -> Html b
 rowView { event, progress } =
     Table.tr []
         [ Table.td [] [ text event.precinct ]

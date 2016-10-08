@@ -1,11 +1,11 @@
 module Eventful.Model exposing (Model, init, Page(..))
 
-import Quanta exposing (Quanta, init)
+import Quanta
 import Material
 
 
 type alias Model =
-    { quanta : Quanta
+    { quanta : Quanta.Model
     , studentId : String
     , mdl : Material.Model
     , currentPage : Page
