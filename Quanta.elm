@@ -1,7 +1,6 @@
 module Quanta exposing (Model, init, decoder, view)
 
 import Html exposing (..)
-import Html.App exposing (..)
 import Html.Attributes exposing (..)
 import Json.Decode as JD exposing ((:=), string, int, bool, list)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
