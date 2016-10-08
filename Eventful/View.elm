@@ -22,13 +22,19 @@ type alias Mdl =
 
 view : Model -> Html Msg
 view ({ currentPage } as model) =
-    case currentPage of
+    let
+        viewPage = viewFromPage currentPage
+    in
+        viewPage model |> Material.Scheme.top
+
+viewFromPage : Page -> Model -> Html Msg
+viewFromPage page =
+    case page of
         Index ->
-            indexView model |> Material.Scheme.top
+            indexView
 
         Settings ->
-            settingsView model |> Material.Scheme.top
-
+            settingsView
 
 settingsView : Model -> Html Msg
 settingsView model =
@@ -36,7 +42,6 @@ settingsView model =
         [ h1 [] [ text "This is the settings page" ]
         , h5 [] [ text "Add stuff here" ]
         ]
-
 
 indexView : Model -> Html Msg
 indexView model =
