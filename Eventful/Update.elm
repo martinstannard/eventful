@@ -1,4 +1,4 @@
-module Eventful.Update exposing (Msg(..), update, urlUpdate)
+module Eventful.Update exposing (Msg(..), update)
 
 import Eventful.Model as Model exposing (Model, Page(..))
 import Quanta exposing (Quanta)
@@ -55,6 +55,3 @@ loadEvents studentId =
             Quanta.decoder
     in
         Task.perform FetchFail FetchSucceed (Http.get decoder url)
-
-urlUpdate : String -> Model -> ( Model, Cmd Msg )
-urlUpdate = update << UpdateUrl

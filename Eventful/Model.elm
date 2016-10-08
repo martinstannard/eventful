@@ -17,19 +17,10 @@ type Page
     = Index
     | Settings
 
-init : Url -> Model
-init url =
-    let
-        page =
-            if url == "settings" then
-                Settings
-            else
-                Index
-        model =
-            { quanta = Quanta.init
-            , studentId = "1"
-            , mdl = Material.model
-            , currentPage = page
-            }
-    in
-        model
+init : Model
+init =
+    { quanta = Quanta.init
+    , studentId = "1"
+    , mdl = Material.model
+    , currentPage = Index
+    }

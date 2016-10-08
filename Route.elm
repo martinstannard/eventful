@@ -1,9 +1,9 @@
-module Route exposing (urlParser)
+module Route exposing (urlParser, urlUpdate)
 
 import String
 import Navigation
 import Eventful.Model exposing (Model, Page(..))
-import Eventful.Update exposing (Msg)
+import Eventful.Update exposing (Msg(..), update)
 
 
 -- URL PARSERS - check out evancz/url-parser for fancier URL parsing
@@ -17,3 +17,6 @@ fromUrl url =
 urlParser : Navigation.Parser String
 urlParser =
     Navigation.makeParser (fromUrl << .hash)
+
+urlUpdate : String -> Model -> ( Model, Cmd Msg )
+urlUpdate = update << UpdateUrl
