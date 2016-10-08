@@ -12,7 +12,7 @@ import Navigation
 main : Program Never
 main =
     Navigation.program Route.urlParser
-        { init = \url -> (init url, Cmd.none)
+        { init = \url -> urlUpdate url (init url)
         , view = view
         , update = update
         , urlUpdate = urlUpdate
