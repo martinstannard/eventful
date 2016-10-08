@@ -7,8 +7,6 @@ import List
 import Route
 import Navigation
 
--- import Html.App exposing (Cmd)
-
 -- Main program
 
 main : Program Never
