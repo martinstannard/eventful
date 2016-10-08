@@ -34,10 +34,11 @@ update msg model =
         UpdateUrl url ->
             let
                 page =
-                    if url == "settings" then
-                        Settings
-                    else
-                        Index
+                    case url of
+                        "settings" ->
+                          Settings
+                        _ ->
+                          Index
             in
                 ( { model | currentPage = page }, Cmd.none )
 
