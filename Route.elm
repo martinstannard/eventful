@@ -18,5 +18,16 @@ urlParser : Navigation.Parser String
 urlParser =
     Navigation.makeParser (fromUrl << .hash)
 
+
 urlUpdate : String -> Model -> ( Model, Cmd Msg )
-urlUpdate = update << UpdateUrl
+urlUpdate url model =
+    let
+        newPage page =
+            ( { model | currentPage = page }, Cmd.none )
+    in
+        case url of
+            "settings" ->
+                newPage Settings
+
+            _ ->
+                newPage Index

@@ -3,6 +3,7 @@ module Eventful.Model exposing (Model, init, Page(..))
 import Quanta exposing (Quanta, init)
 import Material
 
+
 type alias Model =
     { quanta : Quanta
     , studentId : String
@@ -10,12 +11,11 @@ type alias Model =
     , currentPage : Page
     }
 
-type alias Url =
-  String
 
 type Page
     = Index
     | Settings
+
 
 init : Model
 init =

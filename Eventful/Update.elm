@@ -6,7 +6,9 @@ import Material
 import Http
 import Task
 
+
 -- Update
+
 
 type Msg
     = GetEvents
@@ -14,7 +16,7 @@ type Msg
     | FetchFail Http.Error
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
-    | UpdateUrl String
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -31,19 +33,9 @@ update msg model =
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
 
-        UpdateUrl url ->
-            let
-                page =
-                    case url of
-                        "settings" ->
-                          Settings
-                        _ ->
-                          Index
-            in
-                ( { model | currentPage = page }, Cmd.none )
-
         _ ->
             ( model, Cmd.none )
+
 
 loadEvents : String -> Cmd Msg
 loadEvents studentId =
