@@ -1,7 +1,7 @@
 module Eventful.Update exposing (Msg(..), update)
 
 import Eventful.Model as Model exposing (Model, Page(..))
-import Quanta
+import Quanta exposing (Quanta)
 import Material
 import Http
 import Task
@@ -12,7 +12,7 @@ import Task
 
 type Msg
     = GetEvents
-    | FetchSucceed Quanta.Model
+    | FetchSucceed Quanta
     | FetchFail Http.Error
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
