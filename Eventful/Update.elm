@@ -5,6 +5,7 @@ import Quanta exposing (Quanta)
 import Material
 import Http
 import Task
+import Settings
 
 
 -- Update
@@ -16,6 +17,7 @@ type Msg
     | FetchFail Http.Error
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
+    | SettingsMsg Settings.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

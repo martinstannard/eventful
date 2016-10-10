@@ -3,8 +3,9 @@ module Eventful.View exposing (view)
 import Eventful.Update exposing (Msg(..))
 import Eventful.Model exposing (Model, Page(..))
 import Quanta
-
+import Settings
 import Html exposing (..)
+import Html.App
 import Html.Attributes exposing (..)
 import Material
 import Material.Scheme
@@ -13,35 +14,33 @@ import Material.Button as Button
 import Material.Table as Table
 import Material.Options exposing (css)
 
+
 -- Aliases
+
 
 type alias Mdl =
     Material.Model
 
+
+
 -- View
+
 
 view : Model -> Html Msg
 view ({ currentPage } as model) =
-    let
-        viewPage = viewFromPage currentPage
-    in
-        viewPage model |> Material.Scheme.top
+    viewHelper model |> Material.Scheme.top
 
-viewFromPage : Page -> Model -> Html Msg
-viewFromPage page =
-    case page of
+
+viewHelper : Model -> Html Msg
+viewHelper ({ currentPage } as model) =
+    case currentPage of
         Index ->
-            indexView
+            indexView model
 
         Settings ->
-            settingsView
+            Settings.view model.settings
+                |> Html.App.map (\msg -> SettingsMsg msg)
 
-settingsView : Model -> Html Msg
-settingsView model =
-    div []
-        [ h1 [] [ text "This is the settings page" ]
-        , h5 [] [ text "Add stuff here" ]
-        ]
 
 indexView : Model -> Html Msg
 indexView model =
