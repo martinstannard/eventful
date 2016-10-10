@@ -9,6 +9,7 @@ type alias Model =
     , studentId : String
     , mdl : Material.Model
     , currentPage : Page
+    , isLoading : Bool
     }
 
 
@@ -23,4 +24,5 @@ init =
     , studentId = "1"
     , mdl = Material.model
     , currentPage = Index
+    , isLoading = False
     }
