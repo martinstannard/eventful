@@ -9,8 +9,8 @@ import Event exposing (Event)
 import Progress exposing (Progress)
 
 
-type Quanta
-    = Quanta (List Quantum)
+type alias Quanta
+    = List Quantum
 
 
 type alias Quantum =
@@ -21,7 +21,7 @@ type alias Quantum =
 
 init : Quanta
 init =
-    Quanta []
+     []
 
 
 decoder : JD.Decoder Quanta
@@ -30,7 +30,6 @@ decoder =
         |> JsonPipeline.required "progress" Progress.decoder
         |> JsonPipeline.required "event" Event.decoder
         |> JD.list
-        |> JD.map Quanta
 
 
 
@@ -38,7 +37,7 @@ decoder =
 
 
 view : Quanta -> Html b
-view (Quanta quanta) =
+view quanta =
     Table.table []
         [ Table.thead []
             [ Table.tr []
