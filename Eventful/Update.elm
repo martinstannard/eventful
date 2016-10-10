@@ -22,13 +22,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetEvents ->
-            ( model, loadEvents model.studentId )
+            ( { model | isLoading = True }, loadEvents model.studentId )
 
         FetchSucceed quanta ->
-            ( { model | quanta = quanta }, Cmd.none )
+            ( { model | quanta = quanta, isLoading = False }, Cmd.none )
 
         FetchFail error ->
-            ( model, Cmd.none )
+            ( { model | isLoading = False }, Cmd.none )
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
