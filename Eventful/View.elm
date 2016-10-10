@@ -46,28 +46,28 @@ settingsView model =
 indexView : Model -> Html Msg
 indexView ({ isLoading } as model) =
     let
-      buttonText =
-        if isLoading
-        then "Get History - Loading..."
-        else "Get History"
+        buttonText =
+          if isLoading
+            then "Get History - Loading..."
+            else "Get History"
     in
-      div [ style [ ( "padding", "2rem" ) ] ]
-          [ h4 [] [ text "Eventful" ]
-          , Textfield.render MDL
-              [ 0 ]
-              model.mdl
-              [ Textfield.label "Student Id"
-              , Textfield.floatingLabel
-              , Textfield.value model.studentId
-              , Textfield.onInput UpdateStudentId
-              ]
-          , Button.render MDL
-              [ 0 ]
-              model.mdl
-              [ Button.onClick GetEvents
-              , css "margin" "0 24px"
-              ]
-              [ text buttonText ]
-          , br [] []
-          , Quanta.view model.quanta
-          ]
+        div [ style [ ( "padding", "2rem" ) ] ]
+            [ h4 [] [ text "Eventful" ]
+            , Textfield.render MDL
+                [ 0 ]
+                model.mdl
+                [ Textfield.label "Student Id"
+                , Textfield.floatingLabel
+                , Textfield.value model.studentId
+                , Textfield.onInput UpdateStudentId
+                ]
+            , Button.render MDL
+                [ 0 ]
+                model.mdl
+                [ Button.onClick GetEvents
+                , css "margin" "0 24px"
+                ]
+                [ text buttonText ]
+            , br [] []
+            , Quanta.view model.quanta
+            ]
