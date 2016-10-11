@@ -1,7 +1,7 @@
 module Eventful.Update exposing (Msg(..), update)
 
 import Eventful.Model as Model exposing (Model, Page(..))
-import Quanta exposing (Quanta)
+import Quanta exposing (Quanta, QuantaState, fetchSuccess, fetchFailure, fetchStart)
 import Material
 import Http
 import Task
@@ -11,7 +11,7 @@ import Task
 
 
 type Msg
-    = GetEvents
+    = FetchQuanta
     | FetchSucceed Quanta
     | FetchFail Http.Error
     | UpdateStudentId String
@@ -21,14 +21,14 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetEvents ->
-            ( { model | isLoading = True }, loadEvents model.studentId )
+        FetchQuanta ->
+            ( { model | quantaState = Quanta.fetchStart model.quantaState }, fetchQuanta model.studentId )
 
         FetchSucceed quanta ->
-            ( { model | quanta = quanta, isLoading = False }, Cmd.none )
+            ( { model | quantaState = Quanta.fetchSuccess model.quantaState quanta }, Cmd.none )
 
         FetchFail error ->
-            ( { model | isLoading = False }, Cmd.none )
+            ( { model | quantaState = Quanta.fetchFailure model.quantaState }, Cmd.none )
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
@@ -37,8 +37,8 @@ update msg model =
             ( model, Cmd.none )
 
 
-loadEvents : String -> Cmd Msg
-loadEvents studentId =
+fetchQuanta : String -> Cmd Msg
+fetchQuanta studentId =
     let
         url =
             "http://progression.coreos-staging.blakedev.com/api/v3/history/maths/my_lessons/" ++ studentId

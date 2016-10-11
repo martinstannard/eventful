@@ -44,12 +44,15 @@ settingsView model =
         ]
 
 indexView : Model -> Html Msg
-indexView ({ isLoading } as model) =
+indexView model =
     let
+        isFetching { quantaState } =
+          Quanta.isFetching quantaState
         buttonText =
-          if isLoading
+          if (isFetching model)
             then "Get History - Loading..."
             else "Get History"
+
     in
         div [ style [ ( "padding", "2rem" ) ] ]
             [ h4 [] [ text "Eventful" ]
@@ -64,10 +67,10 @@ indexView ({ isLoading } as model) =
             , Button.render MDL
                 [ 0 ]
                 model.mdl
-                [ Button.onClick GetEvents
+                [ Button.onClick FetchQuanta
                 , css "margin" "0 24px"
                 ]
                 [ text buttonText ]
             , br [] []
-            , Quanta.view model.quanta
+            , Quanta.viewFromQuantaState model.quantaState
             ]
