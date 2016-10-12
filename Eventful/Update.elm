@@ -11,7 +11,8 @@ import Task
 
 
 type Msg
-    = FetchQuanta
+    = StartFetchQuanta
+    | FetchQuanta
     | FetchSucceed Quanta
     | FetchFail Http.Error
     | UpdateStudentId String
@@ -21,8 +22,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        StartFetchQuanta ->
+            update FetchQuanta { model | quantaState = Quanta.fetchStart model.quantaState }
+
         FetchQuanta ->
-            ( { model | quantaState = Quanta.fetchStart model.quantaState }, fetchQuanta model.studentId )
+            ( model, fetchQuanta model.studentId )
 
         FetchSucceed quanta ->
             ( { model | quantaState = Quanta.fetchSuccess model.quantaState quanta }, Cmd.none )

@@ -48,10 +48,14 @@ indexView model =
     let
         isFetching { quantaState } =
           Quanta.isFetching quantaState
+        hasFailed { quantaState } =
+          Quanta.hasFailed quantaState
         buttonText =
           if (isFetching model)
             then "Get History - Loading..."
-            else "Get History"
+            else if (hasFailed model)
+              then "Get History - Failed, try again"
+              else "Get History"
 
     in
         div [ style [ ( "padding", "2rem" ) ] ]
@@ -67,7 +71,7 @@ indexView model =
             , Button.render MDL
                 [ 0 ]
                 model.mdl
-                [ Button.onClick FetchQuanta
+                [ Button.onClick StartFetchQuanta
                 , css "margin" "0 24px"
                 ]
                 [ text buttonText ]

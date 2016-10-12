@@ -1,6 +1,6 @@
 module Quanta exposing
     ( Quanta, init, decoder, view, QuantaState, initQuantaState, isFetching
-    , fetchStart, fetchSuccess, fetchFailure, viewFromQuantaState
+    , fetchStart, fetchSuccess, fetchFailure, viewFromQuantaState, hasFailed
     )
 
 import Html exposing (..)
@@ -65,11 +65,19 @@ fetchStart (QuantaState quantaState) =
     | fetchingState = Fetching
     }
 
-
 isFetching : QuantaState -> Bool
 isFetching (QuantaState { fetchingState }) =
   case fetchingState of
       Fetching ->
+          True
+
+      _ ->
+          False
+
+hasFailed : QuantaState -> Bool
+hasFailed (QuantaState { lastFetchSuccess }) =
+  case lastFetchSuccess of
+      Just Failed ->
           True
 
       _ ->
