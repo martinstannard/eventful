@@ -45,23 +45,36 @@ settingsView model =
 
 indexView : Model -> Html Msg
 indexView model =
-    div [ style [ ( "padding", "2rem" ) ] ]
-        [ h4 [] [ text "Eventful" ]
-        , Textfield.render MDL
-            [ 0 ]
-            model.mdl
-            [ Textfield.label "Student Id"
-            , Textfield.floatingLabel
-            , Textfield.value model.studentId
-            , Textfield.onInput UpdateStudentId
+    let
+        isFetching { quantaState } =
+          Quanta.isFetching quantaState
+        hasFailed { quantaState } =
+          Quanta.hasFailed quantaState
+        buttonText =
+          if (isFetching model)
+            then "Get History - Loading..."
+            else if (hasFailed model)
+              then "Get History - Failed, try again"
+              else "Get History"
+
+    in
+        div [ style [ ( "padding", "2rem" ) ] ]
+            [ h4 [] [ text "Eventful" ]
+            , Textfield.render MDL
+                [ 0 ]
+                model.mdl
+                [ Textfield.label "Student Id"
+                , Textfield.floatingLabel
+                , Textfield.value model.studentId
+                , Textfield.onInput UpdateStudentId
+                ]
+            , Button.render MDL
+                [ 0 ]
+                model.mdl
+                [ Button.onClick StartFetchQuanta
+                , css "margin" "0 24px"
+                ]
+                [ text buttonText ]
+            , br [] []
+            , Quanta.viewFromQuantaState model.quantaState
             ]
-        , Button.render MDL
-            [ 0 ]
-            model.mdl
-            [ Button.onClick GetEvents
-            , css "margin" "0 24px"
-            ]
-            [ text "Get History" ]
-        , br [] []
-        , Quanta.view model.quanta
-        ]
