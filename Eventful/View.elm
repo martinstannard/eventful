@@ -46,16 +46,18 @@ indexView : Model -> Html Msg
 indexView model =
     let
         isFetching { quantaState } =
-          Quanta.isFetching quantaState
-        hasFailed { quantaState } =
-          Quanta.hasFailed quantaState
-        buttonText =
-          if (isFetching model)
-            then "Get History - Loading..."
-            else if (hasFailed model)
-              then "Get History - Failed, try again"
-              else "Get History"
+            Quanta.isFetching quantaState
 
+        hasFailed { quantaState } =
+            Quanta.hasFailed quantaState
+
+        buttonText =
+            if (isFetching model) then
+                "Get History - Loading..."
+            else if (hasFailed model) then
+                "Get History - Failed, try again"
+            else
+                "Get History"
     in
         div [ style [ ( "padding", "2rem" ) ] ]
             [ h4 [] [ text "Eventful" ]

@@ -39,6 +39,9 @@ update msg model =
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
 
+        SettingsMsg msg ->
+            ( { model | settings = Settings.update msg model.settings }, Cmd.none )
+
         _ ->
             ( model, Cmd.none )
 
