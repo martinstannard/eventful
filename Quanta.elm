@@ -1,4 +1,18 @@
-module Quanta exposing (Quanta, init, decoder, view)
+module Quanta
+    exposing
+        ( Quanta
+        , init
+        , decoder
+        , view
+        , QuantaState
+        , initQuantaState
+        , isFetching
+        , fetchStart
+        , fetchSuccess
+        , fetchFailure
+        , viewFromQuantaState
+        , hasFailed
+        )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -7,6 +21,24 @@ import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Material.Table as Table
 import Event exposing (Event)
 import Progress exposing (Progress)
+
+
+type QuantaState
+    = QuantaState
+        { maybeQuanta : Maybe Quanta
+        , fetchingState : FetchState
+        , lastFetchSuccess : Maybe SuccessState
+        }
+
+
+type FetchState
+    = Fetching
+    | NotFetching
+
+
+type SuccessState
+    = Succeeded
+    | Failed
 
 
 type Quanta
@@ -24,6 +56,62 @@ init =
     Quanta []
 
 
+initQuantaState : QuantaState
+initQuantaState =
+    QuantaState
+        { maybeQuanta = Nothing
+        , fetchingState = NotFetching
+        , lastFetchSuccess = Nothing
+        }
+
+
+fetchSuccess : QuantaState -> Quanta -> QuantaState
+fetchSuccess (QuantaState quantaState) quanta =
+    QuantaState
+        { quantaState
+            | maybeQuanta = Just quanta
+            , fetchingState = NotFetching
+            , lastFetchSuccess = Just Succeeded
+        }
+
+
+fetchFailure : QuantaState -> QuantaState
+fetchFailure (QuantaState quantaState) =
+    QuantaState
+        { quantaState
+            | fetchingState = NotFetching
+            , lastFetchSuccess = Just Failed
+        }
+
+
+fetchStart : QuantaState -> QuantaState
+fetchStart (QuantaState quantaState) =
+    QuantaState
+        { quantaState
+            | fetchingState = Fetching
+        }
+
+
+isFetching : QuantaState -> Bool
+isFetching (QuantaState { fetchingState }) =
+    case fetchingState of
+        Fetching ->
+            True
+
+        _ ->
+            False
+
+
+hasFailed : QuantaState -> Bool
+hasFailed (QuantaState { lastFetchSuccess }) =
+    case lastFetchSuccess of
+        Just Failed ->
+            True
+
+        _ ->
+            False
+
+
 decoder : JD.Decoder Quanta
 decoder =
     decode Quantum
@@ -35,6 +123,16 @@ decoder =
 
 
 -- View
+
+
+viewFromQuantaState : QuantaState -> Html a
+viewFromQuantaState (QuantaState { maybeQuanta }) =
+    case maybeQuanta of
+        Nothing ->
+            Table.table [] []
+
+        Just quanta ->
+            view quanta
 
 
 view : Quanta -> Html b

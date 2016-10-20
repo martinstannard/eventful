@@ -1,0 +1,1 @@
+- Add simple loading indicator to 'Get History' button

@@ -22,12 +22,12 @@ urlParser =
 urlUpdate : String -> Model -> ( Model, Cmd Msg )
 urlUpdate url model =
     let
-        newPage page =
+        changeToPage page =
             ( { model | currentPage = page }, Cmd.none )
     in
         case url of
             "settings" ->
-                newPage Settings
+                changeToPage Settings
 
             _ ->
-                newPage Index
+                changeToPage Index
