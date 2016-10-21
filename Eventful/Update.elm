@@ -19,6 +19,7 @@ type Msg
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
     | SettingsMsg Settings.Msg
+    | SelectTab Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,6 +42,17 @@ update msg model =
 
         SettingsMsg msg ->
             ( { model | settings = Settings.update msg model.settings }, Cmd.none )
+
+        SelectTab tab ->
+            case tab of
+                0 ->
+                    ( { model | currentPage = Index }, Cmd.none )
+
+                1 ->
+                    ( { model | currentPage = Settings }, Cmd.none )
+
+                _ ->
+                    ( { model | currentPage = Index }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
