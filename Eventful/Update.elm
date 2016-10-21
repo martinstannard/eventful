@@ -5,6 +5,7 @@ import Quanta exposing (Quanta, QuantaState, fetchSuccess, fetchFailure, fetchSt
 import Material
 import Http
 import Task
+import Settings
 
 
 -- Update
@@ -17,6 +18,7 @@ type Msg
     | FetchFail Http.Error
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
+    | SettingsMsg Settings.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -36,6 +38,9 @@ update msg model =
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
+
+        SettingsMsg msg ->
+            ( { model | settings = Settings.update msg model.settings }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
