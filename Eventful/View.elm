@@ -48,11 +48,11 @@ view ({ currentPage } as model) =
             , text "Settings"
             ]
         ]
-        [ viewHelper model |> Material.Scheme.top ]
+        [ viewPage model |> Material.Scheme.top ]
 
 
-viewHelper : Model -> Html Msg
-viewHelper ({ currentPage } as model) =
+viewPage : Model -> Html Msg
+viewPage ({ currentPage } as model) =
     case currentPage of
         Index ->
             indexView model
