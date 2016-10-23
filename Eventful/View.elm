@@ -12,7 +12,9 @@ import Material.Scheme
 import Material.Textfield as Textfield
 import Material.Button as Button
 import Material.Table as Table
-import Material.Options exposing (css)
+import Material.Tabs as Tabs
+import Material.Options as Options exposing (css)
+import Material.Icon as Icon
 
 
 -- Aliases
@@ -28,18 +30,36 @@ type alias Mdl =
 
 view : Model -> Html Msg
 view ({ currentPage } as model) =
-    viewHelper model |> Material.Scheme.top
+    Tabs.render MDL
+        [ 0 ]
+        model.mdl
+        [ Tabs.ripple
+        , Tabs.onSelectTab SelectTab
+        , Tabs.activeTab model.tab
+        ]
+        [ Tabs.label [ Options.center ]
+            [ Icon.i "info_outline"
+            , Options.span [ css "width" "4px" ] []
+            , text "Index"
+            ]
+        , Tabs.label [ Options.center ]
+            [ Icon.i "code"
+            , Options.span [ css "width" "4px" ] []
+            , text "Settings"
+            ]
+        ]
+        [ viewPage model |> Material.Scheme.top ]
 
 
-viewHelper : Model -> Html Msg
-viewHelper ({ currentPage } as model) =
+viewPage : Model -> Html Msg
+viewPage ({ currentPage } as model) =
     case currentPage of
         Index ->
             indexView model
 
         Settings ->
             Settings.view model.settings
-                |> Html.App.map (\msg -> SettingsMsg msg)
+                |> Html.App.map SettingsMsg
 
 
 indexView : Model -> Html Msg

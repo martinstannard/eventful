@@ -11,6 +11,7 @@ type alias Model =
     , mdl : Material.Model
     , currentPage : Page
     , settings : Settings
+    , tab : Int
     }
 
 
@@ -26,4 +27,5 @@ init =
     , mdl = Material.model
     , currentPage = Index
     , settings = Settings.init
+    , tab = 0
     }
