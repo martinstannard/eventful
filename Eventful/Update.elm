@@ -10,8 +10,8 @@ import Settings
 import Navigation
 
 
-toUrl : Model -> String
-toUrl { currentPage } =
+toUrl : Page -> String
+toUrl currentPage =
     let
         pageString =
             case currentPage of
@@ -63,7 +63,7 @@ update msg model =
         SelectTab tab ->
             let
                 updateTo page =
-                    ( { model | currentPage = Index }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
+                    ( { model | currentPage = Index, tab = tab }, Navigation.modifyUrl (toUrl page) )
             in
                 case tab of
                     0 ->
