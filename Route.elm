@@ -5,9 +5,7 @@ import Navigation
 import Eventful.Model exposing (Model, Page(..))
 import Eventful.Update exposing (Msg(..), update)
 
-
 -- URL PARSERS - check out evancz/url-parser for fancier URL parsing
-
 
 fromUrl : String -> String
 fromUrl url =
