@@ -46,13 +46,13 @@ update msg model =
         SelectTab tab ->
             case tab of
                 0 ->
-                    ( { model | currentPage = Index }, Cmd.none )
+                    ( { model | currentPage = Index, tab = tab }, Cmd.none )
 
                 1 ->
-                    ( { model | currentPage = Settings }, Cmd.none )
+                    ( { model | currentPage = Settings, tab = tab  }, Cmd.none )
 
                 _ ->
-                    ( { model | currentPage = Index }, Cmd.none )
+                    ( { model | currentPage = Index, tab = tab  }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
