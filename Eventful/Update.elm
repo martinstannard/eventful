@@ -4,8 +4,25 @@ import Eventful.Model as Model exposing (Model, Page(..))
 import Quanta exposing (Quanta, QuantaState, fetchSuccess, fetchFailure, fetchStart)
 import Material
 import Http
+import String
 import Task
 import Settings
+import Navigation
+
+
+toUrl : Model -> String
+toUrl { currentPage } =
+    let
+        pageString =
+            case currentPage of
+                Settings ->
+                    "settings"
+
+                _ ->
+                    ""
+    in
+        String.append "#/" pageString
+
 
 
 -- Update
@@ -44,15 +61,19 @@ update msg model =
             ( { model | settings = Settings.update msg model.settings }, Cmd.none )
 
         SelectTab tab ->
-            case tab of
-                0 ->
-                    ( { model | currentPage = Index, tab = tab }, Cmd.none )
+            let
+                updateTo page =
+                    ( { model | currentPage = Index }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
+            in
+                case tab of
+                    0 ->
+                        updateTo Index
 
-                1 ->
-                    ( { model | currentPage = Settings, tab = tab  }, Cmd.none )
+                    1 ->
+                        updateTo Settings
 
-                _ ->
-                    ( { model | currentPage = Index, tab = tab  }, Cmd.none )
+                    _ ->
+                        ( { model | currentPage = Index, tab = tab }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
