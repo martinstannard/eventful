@@ -9,17 +9,20 @@ import Task
 import Settings
 import Navigation
 
+
 toUrl : Model -> String
 toUrl { currentPage } =
     let
         pageString =
             case currentPage of
-              Settings ->
-                "settings"
-              _ ->
-                ""
+                Settings ->
+                    "settings"
+
+                _ ->
+                    ""
     in
-      String.append "#/" pageString
+        String.append "#/" pageString
+
 
 
 -- Update
@@ -60,18 +63,17 @@ update msg model =
         SelectTab tab ->
             let
                 updateTo page =
-                      ( { model | currentPage = Index }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
+                    ( { model | currentPage = Index }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
             in
+                case tab of
+                    0 ->
+                        updateTo Index
 
-            case tab of
-                0 ->
-                    updateTo Index
+                    1 ->
+                        updateTo Settings
 
-                1 ->
-                    updateTo Settings
-
-                _ ->
-                    ( { model | currentPage = Index }, Cmd.none )
+                    _ ->
+                        ( { model | currentPage = Index, tab = tab }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
