@@ -1,1 +1,2 @@
+- Fix bug where current tab isn't indicated
 - Add simple loading indicator to 'Get History' button
