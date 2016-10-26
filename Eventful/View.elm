@@ -65,19 +65,16 @@ viewPage ({ currentPage } as model) =
 indexView : Model -> Html Msg
 indexView model =
     let
-        isFetching { quantaState } =
-            Quanta.isFetching quantaState
-
-        hasFailed { quantaState } =
-            Quanta.hasFailed quantaState
-
         buttonText =
-            if (isFetching model) then
-                "Get History - Loading..."
-            else if (hasFailed model) then
-                "Get History - Failed, try again"
-            else
-                "Get History"
+            case Quanta.state model.quanta of
+                Quanta.Fetching ->
+                    "Get History - Loading..."
+
+                Quanta.FetchFailed ->
+                    "Get History - Failed, try again"
+
+                _ ->
+                    "Get History"
     in
         div [ style [ ( "padding", "2rem" ) ] ]
             [ h4 [] [ text "Eventful" ]
@@ -92,10 +89,10 @@ indexView model =
             , Button.render MDL
                 [ 0 ]
                 model.mdl
-                [ Button.onClick StartFetchQuanta
+                [ Button.onClick (GetQuanta model.studentId)
                 , css "margin" "0 24px"
                 ]
                 [ text buttonText ]
             , br [] []
-            , Quanta.viewFromQuantaState model.quantaState
+            , Quanta.view model.quanta
             ]

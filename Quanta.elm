@@ -1,48 +1,45 @@
 module Quanta
     exposing
         ( Quanta
+        , State(..)
+        , Msg
         , init
+        , update
         , decoder
         , view
-        , QuantaState
-        , initQuantaState
-        , isFetching
-        , fetchStart
-        , fetchSuccess
-        , fetchFailure
-        , viewFromQuantaState
-        , hasFailed
+        , state
+        , fetch
         )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Json.Decode as JD exposing ((:=), string, int, bool, list)
+import Json.Decode as JD exposing ((:=))
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Material.Table as Table
 import Event exposing (Event)
 import Progress exposing (Progress)
-
-
-type QuantaState
-    = QuantaState
-        { maybeQuanta : Maybe Quanta
-        , fetchingState : FetchState
-        , lastFetchSuccess : Maybe SuccessState
-        }
-
-
-type FetchState
-    = Fetching
-    | NotFetching
-
-
-type SuccessState
-    = Succeeded
-    | Failed
+import Http
+import Task
+import Settings exposing (Settings)
 
 
 type Quanta
-    = Quanta (List Quantum)
+    = Quanta
+        { maybeQuanta : Maybe (List Quantum)
+        , state : State
+        }
+
+
+type State
+    = Fetching
+    | NotFetching
+    | FetchSucceeded
+    | FetchFailed
+
+
+type Msg
+    = FetchSucceed (List Quantum)
+    | FetchFail Http.Error
 
 
 type alias Quantum =
@@ -53,106 +50,72 @@ type alias Quantum =
 
 init : Quanta
 init =
-    Quanta []
-
-
-initQuantaState : QuantaState
-initQuantaState =
-    QuantaState
+    Quanta
         { maybeQuanta = Nothing
-        , fetchingState = NotFetching
-        , lastFetchSuccess = Nothing
+        , state = NotFetching
         }
 
 
-fetchSuccess : QuantaState -> Quanta -> QuantaState
-fetchSuccess (QuantaState quantaState) quanta =
-    QuantaState
-        { quantaState
-            | maybeQuanta = Just quanta
-            , fetchingState = NotFetching
-            , lastFetchSuccess = Just Succeeded
-        }
+update : Msg -> Quanta -> ( Quanta, Cmd Msg )
+update msg (Quanta model) =
+    case msg of
+        FetchSucceed quantums ->
+            ( Quanta { model | state = FetchSucceeded, maybeQuanta = Just quantums }, Cmd.none )
+
+        FetchFail error ->
+            ( Quanta { model | state = FetchFailed, maybeQuanta = Nothing }, Cmd.none )
 
 
-fetchFailure : QuantaState -> QuantaState
-fetchFailure (QuantaState quantaState) =
-    QuantaState
-        { quantaState
-            | fetchingState = NotFetching
-            , lastFetchSuccess = Just Failed
-        }
+fetch : Settings -> String -> Quanta -> ( Quanta, Cmd Msg )
+fetch settings studentId (Quanta model) =
+    let
+        url =
+            (Settings.endPoint settings) ++ studentId
+    in
+        ( Quanta { model | state = Fetching }
+        , Task.perform FetchFail FetchSucceed (Http.get decoder url)
+        )
 
 
-fetchStart : QuantaState -> QuantaState
-fetchStart (QuantaState quantaState) =
-    QuantaState
-        { quantaState
-            | fetchingState = Fetching
-        }
-
-
-isFetching : QuantaState -> Bool
-isFetching (QuantaState { fetchingState }) =
-    case fetchingState of
-        Fetching ->
-            True
-
-        _ ->
-            False
-
-
-hasFailed : QuantaState -> Bool
-hasFailed (QuantaState { lastFetchSuccess }) =
-    case lastFetchSuccess of
-        Just Failed ->
-            True
-
-        _ ->
-            False
-
-
-decoder : JD.Decoder Quanta
+decoder : JD.Decoder (List Quantum)
 decoder =
     decode Quantum
         |> JsonPipeline.required "progress" Progress.decoder
         |> JsonPipeline.required "event" Event.decoder
         |> JD.list
-        |> JD.map Quanta
+
+
+state : Quanta -> State
+state (Quanta model) =
+    model.state
 
 
 
 -- View
 
 
-viewFromQuantaState : QuantaState -> Html a
-viewFromQuantaState (QuantaState { maybeQuanta }) =
-    case maybeQuanta of
-        Nothing ->
-            Table.table [] []
-
-        Just quanta ->
-            view quanta
-
-
 view : Quanta -> Html b
-view (Quanta quanta) =
-    Table.table []
-        [ Table.thead []
-            [ Table.tr []
-                [ Table.th [] [ text "Precinct" ]
-                , Table.th [] [ text "Event Type" ]
-                , Table.th [] [ text "Lesson" ]
-                , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Map" ]
-                , Table.th [] [ text "Position" ]
-                , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Placement Test" ]
+view (Quanta model) =
+    let
+        quantums =
+            Maybe.withDefault [] model.maybeQuanta
+    in
+        Table.table []
+            [ Table.thead []
+                [ Table.tr []
+                    [ Table.th [] [ text "Precinct" ]
+                    , Table.th [] [ text "Event Type" ]
+                    , Table.th [] [ text "Lesson" ]
+                    , Table.th [] [ text "Activity" ]
+                    , Table.th [] [ text "Map" ]
+                    , Table.th [] [ text "Position" ]
+                    , Table.th [] [ text "Activity" ]
+                    , Table.th [] [ text "Placement Test" ]
+                    ]
                 ]
+            , tbody []
+                (List.map rowView quantums)
             ]
-        , tbody []
-            (List.map rowView quanta)
-        ]
 
 
 rowView : Quantum -> Html b

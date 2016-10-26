@@ -1,12 +1,12 @@
 module Eventful.Model exposing (Model, init, Page(..))
 
-import Quanta exposing (QuantaState, initQuantaState)
+import Quanta exposing (Quanta)
 import Material
-import Settings exposing (Settings, init)
+import Settings exposing (Settings)
 
 
 type alias Model =
-    { quantaState : QuantaState
+    { quanta : Quanta
     , studentId : String
     , mdl : Material.Model
     , currentPage : Page
@@ -22,7 +22,7 @@ type Page
 
 init : Model
 init =
-    { quantaState = initQuantaState
+    { quanta = Quanta.init
     , studentId = "123"
     , mdl = Material.model
     , currentPage = Index

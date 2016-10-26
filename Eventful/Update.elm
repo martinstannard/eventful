@@ -1,12 +1,12 @@
 module Eventful.Update exposing (Msg(..), update)
 
 import Eventful.Model as Model exposing (Model, Page(..))
-import Quanta exposing (Quanta, QuantaState, fetchSuccess, fetchFailure, fetchStart)
+import Quanta exposing (Quanta)
 import Material
 import Http
 import String
 import Task
-import Settings
+import Settings exposing (Settings)
 import Navigation
 
 
@@ -29,10 +29,8 @@ toUrl { currentPage } =
 
 
 type Msg
-    = StartFetchQuanta
-    | FetchQuanta
-    | FetchSucceed Quanta
-    | FetchFail Http.Error
+    = QuantaMsg Quanta.Msg
+    | GetQuanta String
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
     | SettingsMsg Settings.Msg
@@ -42,17 +40,12 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        StartFetchQuanta ->
-            update FetchQuanta { model | quantaState = Quanta.fetchStart model.quantaState }
-
-        FetchQuanta ->
-            ( model, fetchQuanta model.settings model.studentId )
-
-        FetchSucceed quanta ->
-            ( { model | quantaState = Quanta.fetchSuccess model.quantaState quanta }, Cmd.none )
-
-        FetchFail error ->
-            ( { model | quantaState = Quanta.fetchFailure model.quantaState }, Cmd.none )
+        GetQuanta studentId ->
+            let
+                ( quantaStartFetching, quantaCmds ) =
+                    Quanta.fetch model.settings studentId model.quanta
+            in
+                ( { model | quanta = quantaStartFetching }, Cmd.map QuantaMsg quantaCmds )
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
@@ -77,16 +70,3 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
-
-
-fetchQuanta : Settings -> String -> Cmd Msg
-fetchQuanta settings studentId =
-    let
-        url =
-            Settings.endPoint settings studentId
-
-        --          "http://localhost:4000/api/v3/history/maths/my_lessons/" ++ studentId
-        decoder =
-            Quanta.decoder
-    in
-        Task.perform FetchFail FetchSucceed (Http.get decoder url)

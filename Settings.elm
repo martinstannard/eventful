@@ -12,7 +12,7 @@ import String
 import Html exposing (..)
 import Html.Events as HE exposing (..)
 import Html.Attributes as HA exposing (..)
-import Dict exposing (Dict)
+import AllDict exposing (AllDict)
 
 
 -- Material
@@ -79,13 +79,13 @@ type Endpoint
     | StagingProgress
 
 
-endpoints : Dict Endpoint String
+endpoints : AllDict Endpoint String String
 endpoints =
     let
         stagingApi =
             "http://progression.coreos-staging.blakedev.com/api/v3"
     in
-        Dict.fromList
+        AllDict.fromList toString
             [ ( StagingHistory, stagingApi ++ "/history/maths/my_lessons/" )
             , ( StagingProgress, stagingApi ++ "/progress/maths/my_lessons/" )
             ]
