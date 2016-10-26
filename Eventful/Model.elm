@@ -23,7 +23,7 @@ type Page
 init : Model
 init =
     { quantaState = initQuantaState
-    , studentId = "1"
+    , studentId = "123"
     , mdl = Material.model
     , currentPage = Index
     , settings = Settings.init

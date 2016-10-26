@@ -46,7 +46,7 @@ update msg model =
             update FetchQuanta { model | quantaState = Quanta.fetchStart model.quantaState }
 
         FetchQuanta ->
-            ( model, fetchQuanta model.studentId )
+            ( model, fetchQuanta model.settings model.studentId )
 
         FetchSucceed quanta ->
             ( { model | quantaState = Quanta.fetchSuccess model.quantaState quanta }, Cmd.none )
@@ -79,11 +79,11 @@ update msg model =
             ( model, Cmd.none )
 
 
-fetchQuanta : String -> Cmd Msg
-fetchQuanta studentId =
+fetchQuanta : Settings -> String -> Cmd Msg
+fetchQuanta settings studentId =
     let
         url =
-            "http://progression.coreos-staging.blakedev.com/api/v3/history/maths/my_lessons/" ++ studentId
+            Settings.endPoint settings studentId
 
         --          "http://localhost:4000/api/v3/history/maths/my_lessons/" ++ studentId
         decoder =
