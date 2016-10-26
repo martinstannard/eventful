@@ -1,4 +1,4 @@
-module Settings
+module Pages.Settings
     exposing
         ( Settings
         , Msg

@@ -5,8 +5,6 @@ module EHR
         , Msg
         , init
         , update
-        , decoder
-        , view
         , state
         , fetch
         )
@@ -19,19 +17,16 @@ module EHR
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Json.Decode as JD exposing ((:=))
-import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
+import Json.Decode as JD
 import Material.Table as Table
-import Event exposing (Event)
-import Progress exposing (Progress)
-import Http
+import Decoders.ProgressionHistoryV3 as History exposing (History)
 import Task
-import Settings exposing (Settings)
+import Http
 
 
 type EHR
     = EHR
-        { data : Maybe (List Quantum)
+        { data : Maybe (List History)
         , state : State
         }
 
@@ -44,14 +39,8 @@ type State
 
 
 type Msg
-    = FetchSucceed (List Quantum)
+    = FetchSucceed (List History)
     | FetchFail Http.Error
-
-
-type alias Quantum =
-    { progress : Progress
-    , event : Event
-    }
 
 
 init : EHR
@@ -72,67 +61,11 @@ update msg (EHR model) =
             ( EHR { model | state = FetchFailed, data = Nothing }, Cmd.none )
 
 
-fetch : Settings -> String -> EHR -> ( EHR, Cmd Msg )
-fetch settings studentId (EHR model) =
-    let
-        url =
-            (Settings.endPoint settings) ++ studentId
-    in
-        ( EHR { model | state = Fetching }
-        , Task.perform FetchFail FetchSucceed (Http.get decoder url)
-        )
-
-
-decoder : JD.Decoder (List Quantum)
-decoder =
-    decode Quantum
-        |> JsonPipeline.required "progress" Progress.decoder
-        |> JsonPipeline.required "event" Event.decoder
-        |> JD.list
+fetch : String -> JD.Decoder -> EHR -> ( EHR, Cmd Msg )
+fetch url decoder (EHR model) =
+    ( EHR { model | state = Fetching }, Task.perform FetchFail FetchSucceed (Http.get decoder url) )
 
 
 state : EHR -> State
 state (EHR model) =
     model.state
-
-
-
--- View
-
-
-view : EHR -> Html b
-view (EHR model) =
-    let
-        quantums =
-            Maybe.withDefault [] model.data
-    in
-        Table.table []
-            [ Table.thead []
-                [ Table.tr []
-                    [ Table.th [] [ text "Precinct" ]
-                    , Table.th [] [ text "Event Type" ]
-                    , Table.th [] [ text "Lesson" ]
-                    , Table.th [] [ text "Activity" ]
-                    , Table.th [] [ text "Map" ]
-                    , Table.th [] [ text "Position" ]
-                    , Table.th [] [ text "Activity" ]
-                    , Table.th [] [ text "Placement Test" ]
-                    ]
-                ]
-            , tbody []
-                (List.map rowView quantums)
-            ]
-
-
-rowView : Quantum -> Html b
-rowView { event, progress } =
-    Table.tr []
-        [ Table.td [] [ text event.precinct ]
-        , Table.td [] [ text event.event_type ]
-        , Table.td [ Table.numeric ] [ text (toString event.lesson) ]
-        , Table.td [ Table.numeric ] [ text (toString event.activity) ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.map) ] ]
-        , Table.td [] [ strong [] [ text progress.position ] ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.activity) ] ]
-        , Table.td [] [ strong [] [ text (toString progress.placement_test) ] ]
-        ]
