@@ -31,7 +31,7 @@ type Index
 
 
 type alias Model =
-    { ehr : EHR History
+    { ehr : EHR History Msg
     , studentId : String
     , mdl : Material.Model
     }
@@ -39,7 +39,7 @@ type alias Model =
 
 type Msg
     = GetQuanta String
-    | EHRMsg EHR.Msg
+    | EHRMsg (EHR.Msg History)
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
 
@@ -52,7 +52,7 @@ init =
     }
 
 
-update : Msg -> Settings -> Index -> Index
+update : Msg -> Settings -> Index -> ( Index, Cmd Msg )
 update msg settings (Index model) =
     case msg of
         GetQuanta studentId ->
@@ -66,17 +66,20 @@ update msg settings (Index model) =
                 ( ehrStartedFetch, ehrCmds ) =
                     EHR.fetch url decoder model.ehr
             in
-                ( { model | quanta = ehrStartedFetch }, Cmd.map EHRMsg ehrCmds )
+                ( Index { model | ehr = ehrStartedFetch }, Cmd.map EHRMsg ehrCmds )
 
         EHRMsg msg ->
             let
-                ( quanta_, quantaCmds ) =
-                    EHR.update msg model.quanta
+                ( ehr_, ehrCmds ) =
+                    EHR.update msg model.ehr
             in
-                ( { model | quanta = quanta_ }, Cmd.map EHRMsg quantaCmds )
+                ( Index { model | ehr = ehr_ }, Cmd.map EHRMsg ehrCmds )
 
         UpdateStudentId id ->
-            ( { model | studentId = id }, Cmd.none )
+            ( Index { model | studentId = id }, Cmd.none )
+
+        _ ->
+            ( Index model, Cmd.none )
 
 
 
@@ -87,7 +90,7 @@ view : Index -> Html Msg
 view (Index model) =
     let
         buttonText =
-            case EHR.state model.quanta of
+            case EHR.state model.ehr of
                 EHR.Fetching ->
                     "Get History - Loading..."
 

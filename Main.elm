@@ -47,6 +47,7 @@ main =
 type alias Model =
     { currentPage : Page
     , settings : Settings
+    , index : Index
     , tab : Int
     , mdl : Material.Model
     }
@@ -78,7 +79,11 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         IndexMsg msg ->
-            ( { model | index = Index.update msg model.settings model.index }, Cmd.none )
+            let
+                ( index_, indexCmds ) =
+                    Index.update msg model.settings model.index
+            in
+                ( { model | index = index_ }, Cmd.map IndexMsg indexCmds )
 
         SettingsMsg msg ->
             ( { model | settings = Settings.update msg model.settings }, Cmd.none )

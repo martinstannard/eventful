@@ -4,6 +4,7 @@ module EHR
         , State(..)
         , Msg
         , init
+        , view
         , update
         , state
         , fetch
@@ -25,7 +26,7 @@ import Task
 import Http
 
 
-type EHR a
+type EHR a b
     = EHR
         { data : Maybe a
         , state : State
@@ -45,7 +46,7 @@ type Msg a
     | FetchFail Http.Error
 
 
-init : (a -> Html b) -> EHR a
+init : (a -> Html b) -> EHR a b
 init viewFn =
     EHR
         { data = Nothing
@@ -54,17 +55,22 @@ init viewFn =
         }
 
 
-view : EHR a -> Html b
+view : EHR a b -> Html b
 view (EHR model) =
-    model.viewFn model.data
+    case model.data of
+        Nothing ->
+            div [] []
+
+        Just data ->
+            model.viewFn data
 
 
-data : EHR a -> Maybe a
+data : EHR a b -> Maybe a
 data (EHR model) =
     model.data
 
 
-update : Msg a -> EHR a -> ( EHR a, Cmd (Msg a) )
+update : Msg a -> EHR a b -> ( EHR a b, Cmd (Msg a) )
 update msg (EHR model) =
     case msg of
         FetchSucceed quantums ->
@@ -74,11 +80,11 @@ update msg (EHR model) =
             ( EHR { model | state = FetchFailed, data = Nothing }, Cmd.none )
 
 
-fetch : String -> JD.Decoder a -> EHR a -> ( EHR a, Cmd (Msg a) )
+fetch : String -> JD.Decoder a -> EHR a b -> ( EHR a b, Cmd (Msg a) )
 fetch url decoder (EHR model) =
     ( EHR { model | state = Fetching }, Task.perform FetchFail FetchSucceed (Http.get decoder url) )
 
 
-state : EHR a -> State
+state : EHR a b -> State
 state (EHR model) =
     model.state
