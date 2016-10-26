@@ -1,6 +1,6 @@
-module Quanta
+module EHR
     exposing
-        ( Quanta
+        ( EHR
         , State(..)
         , Msg
         , init
@@ -10,6 +10,12 @@ module Quanta
         , state
         , fetch
         )
+
+{- ! A Elm HttpRequest is like a XHR but for Elm.
+   It takes a endpoint, a decode of a model and will make
+   a http request then tries to decode the value into
+   the provided model.
+-}
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -23,9 +29,9 @@ import Task
 import Settings exposing (Settings)
 
 
-type Quanta
-    = Quanta
-        { maybeQuanta : Maybe (List Quantum)
+type EHR
+    = EHR
+        { data : Maybe (List Quantum)
         , state : State
         }
 
@@ -48,31 +54,31 @@ type alias Quantum =
     }
 
 
-init : Quanta
+init : EHR
 init =
-    Quanta
-        { maybeQuanta = Nothing
+    EHR
+        { data = Nothing
         , state = NotFetching
         }
 
 
-update : Msg -> Quanta -> ( Quanta, Cmd Msg )
-update msg (Quanta model) =
+update : Msg -> EHR -> ( EHR, Cmd Msg )
+update msg (EHR model) =
     case msg of
         FetchSucceed quantums ->
-            ( Quanta { model | state = FetchSucceeded, maybeQuanta = Just quantums }, Cmd.none )
+            ( EHR { model | state = FetchSucceeded, data = Just quantums }, Cmd.none )
 
         FetchFail error ->
-            ( Quanta { model | state = FetchFailed, maybeQuanta = Nothing }, Cmd.none )
+            ( EHR { model | state = FetchFailed, data = Nothing }, Cmd.none )
 
 
-fetch : Settings -> String -> Quanta -> ( Quanta, Cmd Msg )
-fetch settings studentId (Quanta model) =
+fetch : Settings -> String -> EHR -> ( EHR, Cmd Msg )
+fetch settings studentId (EHR model) =
     let
         url =
             (Settings.endPoint settings) ++ studentId
     in
-        ( Quanta { model | state = Fetching }
+        ( EHR { model | state = Fetching }
         , Task.perform FetchFail FetchSucceed (Http.get decoder url)
         )
 
@@ -85,8 +91,8 @@ decoder =
         |> JD.list
 
 
-state : Quanta -> State
-state (Quanta model) =
+state : EHR -> State
+state (EHR model) =
     model.state
 
 
@@ -94,11 +100,11 @@ state (Quanta model) =
 -- View
 
 
-view : Quanta -> Html b
-view (Quanta model) =
+view : EHR -> Html b
+view (EHR model) =
     let
         quantums =
-            Maybe.withDefault [] model.maybeQuanta
+            Maybe.withDefault [] model.data
     in
         Table.table []
             [ Table.thead []

@@ -2,7 +2,7 @@ module Eventful.View exposing (view)
 
 import Eventful.Update exposing (Msg(..))
 import Eventful.Model exposing (Model, Page(..))
-import Quanta
+import EHR
 import Settings
 import Html exposing (..)
 import Html.App
@@ -66,11 +66,11 @@ indexView : Model -> Html Msg
 indexView model =
     let
         buttonText =
-            case Quanta.state model.quanta of
-                Quanta.Fetching ->
+            case EHR.state model.quanta of
+                EHR.Fetching ->
                     "Get History - Loading..."
 
-                Quanta.FetchFailed ->
+                EHR.FetchFailed ->
                     "Get History - Failed, try again"
 
                 _ ->
@@ -94,5 +94,5 @@ indexView model =
                 ]
                 [ text buttonText ]
             , br [] []
-            , Quanta.view model.quanta
+            , EHR.view model.quanta
             ]

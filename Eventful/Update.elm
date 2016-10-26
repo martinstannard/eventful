@@ -1,7 +1,7 @@
 module Eventful.Update exposing (Msg(..), update)
 
 import Eventful.Model as Model exposing (Model, Page(..))
-import Quanta exposing (Quanta)
+import EHR exposing (EHR)
 import Material
 import Http
 import String
@@ -29,7 +29,7 @@ toUrl { currentPage } =
 
 
 type Msg
-    = QuantaMsg Quanta.Msg
+    = EHRMsg EHR.Msg
     | GetQuanta String
     | UpdateStudentId String
     | MDL (Material.Msg Msg)
@@ -43,9 +43,16 @@ update msg model =
         GetQuanta studentId ->
             let
                 ( quantaStartFetching, quantaCmds ) =
-                    Quanta.fetch model.settings studentId model.quanta
+                    EHR.fetch model.settings studentId model.quanta
             in
-                ( { model | quanta = quantaStartFetching }, Cmd.map QuantaMsg quantaCmds )
+                ( { model | quanta = quantaStartFetching }, Cmd.map EHRMsg quantaCmds )
+
+        EHRMsg msg ->
+            let
+                ( quanta_, quantaCmds ) =
+                    EHR.update msg model.quanta
+            in
+                ( { model | quanta = quanta_ }, Cmd.map EHRMsg quantaCmds )
 
         UpdateStudentId id ->
             ( { model | studentId = id }, Cmd.none )
@@ -56,7 +63,7 @@ update msg model =
         SelectTab tab ->
             let
                 updateTo page =
-                    ( { model | currentPage = Index }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
+                    ( { model | currentPage = Index, tab = tab }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
             in
                 case tab of
                     0 ->
