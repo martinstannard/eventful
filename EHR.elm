@@ -7,6 +7,7 @@ module EHR
         , update
         , state
         , fetch
+        , data
         )
 
 {- ! A Elm HttpRequest is like a XHR but for Elm.
@@ -24,10 +25,11 @@ import Task
 import Http
 
 
-type EHR
+type EHR a
     = EHR
-        { data : Maybe (List History)
+        { data : Maybe a
         , state : State
+        , viewFn : a -> Html b
         }
 
 
@@ -38,20 +40,31 @@ type State
     | FetchFailed
 
 
-type Msg
-    = FetchSucceed (List History)
+type Msg a
+    = FetchSucceed a
     | FetchFail Http.Error
 
 
-init : EHR
-init =
+init : (a -> Html b) -> EHR a
+init viewFn =
     EHR
         { data = Nothing
         , state = NotFetching
+        , viewFn = viewFn
         }
 
 
-update : Msg -> EHR -> ( EHR, Cmd Msg )
+view : EHR a -> Html b
+view (EHR model) =
+    model.viewFn model.data
+
+
+data : EHR a -> Maybe a
+data (EHR model) =
+    model.data
+
+
+update : Msg a -> EHR a -> ( EHR a, Cmd (Msg a) )
 update msg (EHR model) =
     case msg of
         FetchSucceed quantums ->
@@ -61,11 +74,11 @@ update msg (EHR model) =
             ( EHR { model | state = FetchFailed, data = Nothing }, Cmd.none )
 
 
-fetch : String -> JD.Decoder -> EHR -> ( EHR, Cmd Msg )
+fetch : String -> JD.Decoder a -> EHR a -> ( EHR a, Cmd (Msg a) )
 fetch url decoder (EHR model) =
     ( EHR { model | state = Fetching }, Task.perform FetchFail FetchSucceed (Http.get decoder url) )
 
 
-state : EHR -> State
+state : EHR a -> State
 state (EHR model) =
     model.state

@@ -4,6 +4,12 @@ import List exposing (..)
 import Dict exposing (..)
 import Set exposing (..)
 import EHR exposing (EHR)
+import Decoders.ProgressionHistoryV3 as History exposing (History)
+import Pages.Settings as Settings exposing (Settings)
+
+
+-- Html
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
@@ -25,7 +31,7 @@ type Index
 
 
 type alias Model =
-    { ehr : EHR
+    { ehr : EHR History
     , studentId : String
     , mdl : Material.Model
     }
@@ -40,24 +46,27 @@ type Msg
 
 init : Model
 init =
-    { ehr = EHR.init
+    { ehr = EHR.init History.view
     , mdl = Material.model
     , studentId = "123"
     }
 
 
-update : Msg -> Index -> Index
-update msg (Index model) =
+update : Msg -> Settings -> Index -> Index
+update msg settings (Index model) =
     case msg of
         GetQuanta studentId ->
             let
                 url =
-                    (Settings.endPoint model.settings) ++ studentId
+                    (Settings.endPoint settings) ++ studentId
 
-                ( quantaStartFetching, quantaCmds ) =
-                    EHR.fetch url model.quanta
+                decoder =
+                    History.decoder
+
+                ( ehrStartedFetch, ehrCmds ) =
+                    EHR.fetch url decoder model.ehr
             in
-                ( { model | quanta = quantaStartFetching }, Cmd.map EHRMsg quantaCmds )
+                ( { model | quanta = ehrStartedFetch }, Cmd.map EHRMsg ehrCmds )
 
         EHRMsg msg ->
             let
@@ -70,11 +79,12 @@ update msg (Index model) =
             ( { model | studentId = id }, Cmd.none )
 
 
+
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : Index -> Html Msg
+view (Index model) =
     let
         buttonText =
             case EHR.state model.quanta of
@@ -105,43 +115,5 @@ view model =
                 ]
                 [ text buttonText ]
             , br [] []
-            , viewData model.quanta
+            , (EHR.view model.ehr)
             ]
-
-
-viewData : EHR -> Html b
-viewData (EHR model) =
-    let
-        quantums =
-            Maybe.withDefault [] model.data
-    in
-        Table.table []
-            [ Table.thead []
-                [ Table.tr []
-                    [ Table.th [] [ text "Precinct" ]
-                    , Table.th [] [ text "Event Type" ]
-                    , Table.th [] [ text "Lesson" ]
-                    , Table.th [] [ text "Activity" ]
-                    , Table.th [] [ text "Map" ]
-                    , Table.th [] [ text "Position" ]
-                    , Table.th [] [ text "Activity" ]
-                    , Table.th [] [ text "Placement Test" ]
-                    ]
-                ]
-            , tbody []
-                (List.map rowView quantums)
-            ]
-
-
-rowView : Quantum -> Html b
-rowView { event, progress } =
-    Table.tr []
-        [ Table.td [] [ text event.precinct ]
-        , Table.td [] [ text event.event_type ]
-        , Table.td [ Table.numeric ] [ text (toString event.lesson) ]
-        , Table.td [ Table.numeric ] [ text (toString event.activity) ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.map) ] ]
-        , Table.td [] [ strong [] [ text progress.position ] ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.activity) ] ]
-        , Table.td [] [ strong [] [ text (toString progress.placement_test) ] ]
-        ]

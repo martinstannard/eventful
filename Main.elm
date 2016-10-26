@@ -78,7 +78,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         IndexMsg msg ->
-            ( { model | index = Index.update msg model.index }, Cmd.none )
+            ( { model | index = Index.update msg model.settings model.index }, Cmd.none )
 
         SettingsMsg msg ->
             ( { model | settings = Settings.update msg model.settings }, Cmd.none )

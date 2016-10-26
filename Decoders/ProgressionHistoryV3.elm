@@ -1,4 +1,4 @@
-module Decoders.ProgressionHistoryV3 exposing (History, decoder)
+module Decoders.ProgressionHistoryV3 exposing (History, decoder, view)
 
 {-| Decoder for progression app, history endpoint. The history endpoint looks
     like this:
@@ -21,22 +21,52 @@ module Decoders.ProgressionHistoryV3 exposing (History, decoder)
 
     This is decoded into a list of History data types.
 -}
+
 import Json.Decode as JD
 import Json.Decode.Pipeline as JP
 
 
-type alias History =
+-- Html
+
+import Html exposing (..)
+import Html.Attributes exposing (..)
+
+
+-- Material
+
+import Material
+import Material.Scheme
+import Material.Textfield as Textfield
+import Material.Button as Button
+import Material.Table as Table
+import Material.Tabs as Tabs
+import Material.Options as Options exposing (css)
+import Material.Icon as Icon
+
+
+type History
+    = History (List Model)
+
+
+type alias Model =
     { progress : Progress
     , event : Event
     }
 
 
-decoder : JD.Decoder (List History)
+
+--------------
+-- Decoders --
+--------------
+
+
+decoder : JD.Decoder History
 decoder =
-    JP.decode History
+    JP.decode Model
         |> JP.required "progress" progressDecoder
         |> JP.required "event" eventDecoder
         |> JD.list
+        |> JD.map History
 
 
 
@@ -82,3 +112,42 @@ progressDecoder =
         |> JP.required "map" JD.int
         |> JP.required "activity" JD.int
 
+
+
+----------
+-- View --
+----------
+
+
+view : History -> Html b
+view (History models) =
+    Table.table []
+        [ Table.thead []
+            [ Table.tr []
+                [ Table.th [] [ text "Precinct" ]
+                , Table.th [] [ text "Event Type" ]
+                , Table.th [] [ text "Lesson" ]
+                , Table.th [] [ text "Activity" ]
+                , Table.th [] [ text "Map" ]
+                , Table.th [] [ text "Position" ]
+                , Table.th [] [ text "Activity" ]
+                , Table.th [] [ text "Placement Test" ]
+                ]
+            ]
+        , tbody []
+            (List.map rowView models)
+        ]
+
+
+rowView : Model -> Html b
+rowView { event, progress } =
+    Table.tr []
+        [ Table.td [] [ text event.precinct ]
+        , Table.td [] [ text event.event_type ]
+        , Table.td [ Table.numeric ] [ text (toString event.lesson) ]
+        , Table.td [ Table.numeric ] [ text (toString event.activity) ]
+        , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.map) ] ]
+        , Table.td [] [ strong [] [ text progress.position ] ]
+        , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.activity) ] ]
+        , Table.td [] [ strong [] [ text (toString progress.placement_test) ] ]
+        ]
