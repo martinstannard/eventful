@@ -91,7 +91,7 @@ update msg model =
         SelectTab tab ->
             let
                 updateTo page =
-                    ( { model | currentPage = Index, tab = tab }, Navigation.modifyUrl (toUrl { model | currentPage = page }) )
+                    ( { model | currentPage = Index, tab = tab }, Navigation.modifyUrl (toUrl page) )
             in
                 case tab of
                     0 ->
@@ -153,7 +153,7 @@ urlUpdate url model =
             ( { model | currentPage = page }, Cmd.none )
     in
         url
-            |> AllDict.get url routes
+            |> (\x -> AllDict.get x routes)
             |> Maybe.withDefault Index
             |> changeToPage
 
@@ -168,29 +168,28 @@ urlParser =
     Navigation.makeParser (fromUrl << .hash)
 
 
-toUrl : Model -> String
-toUrl { currentPage } =
-    currentPage
-        |> (\x -> AllDict.get x routes)
-        |> Maybe.withDefault Index
+toUrl : Page -> String
+toUrl page =
+    page
         |> (\x -> AllDict.get x reverseRoutes)
+        |> Maybe.withDefault "index"
         |> String.append "#/"
 
 
-routes : AllDict String Page
+routes : AllDict String Page String
 routes =
-    AllDict.fromList urlPagePairs
+    AllDict.fromList toString urlPagePairs
 
 
-reverseRoutes : AllDict Page String
+reverseRoutes : AllDict Page String String
 reverseRoutes =
     let
-        reverseTuple ( a, b ) =
+        flip ( a, b ) =
             ( b, a )
     in
         urlPagePairs
-            |> List.map reverseTuple
-            |> AllDict.fromList
+            |> List.map flip
+            |> AllDict.fromList toString
 
 
 urlPagePairs : List ( String, Page )

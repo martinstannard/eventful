@@ -44,12 +44,13 @@ type Msg
     | MDL (Material.Msg Msg)
 
 
-init : Model
+init : Index
 init =
-    { ehr = EHR.init History.view
-    , mdl = Material.model
-    , studentId = "123"
-    }
+    Index
+        { ehr = EHR.init History.view
+        , mdl = Material.model
+        , studentId = "123"
+        }
 
 
 update : Msg -> Settings -> Index -> ( Index, Cmd Msg )
