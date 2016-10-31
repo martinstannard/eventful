@@ -1,9 +1,18 @@
-module Settings exposing (Settings, Msg, init, view, update)
+module Pages.Settings
+    exposing
+        ( Settings
+        , Msg
+        , init
+        , view
+        , update
+        , endPoint
+        )
 
 import String
 import Html exposing (..)
 import Html.Events as HE exposing (..)
 import Html.Attributes as HA exposing (..)
+import AllDict exposing (AllDict)
 
 
 -- Material
@@ -45,6 +54,11 @@ update msg (Settings model) =
             Settings model
 
 
+endPoint : Settings -> String
+endPoint (Settings settings) =
+    settings.url
+
+
 view : Settings -> Html Msg
 view (Settings model) =
     div []
@@ -58,3 +72,20 @@ view (Settings model) =
             , Textfield.value model.url
             ]
         ]
+
+
+type Endpoint
+    = StagingHistory
+    | StagingProgress
+
+
+endpoints : AllDict Endpoint String String
+endpoints =
+    let
+        stagingApi =
+            "http://progression.coreos-staging.blakedev.com/api/v3"
+    in
+        AllDict.fromList toString
+            [ ( StagingHistory, stagingApi ++ "/history/maths/my_lessons/" )
+            , ( StagingProgress, stagingApi ++ "/progress/maths/my_lessons/" )
+            ]
