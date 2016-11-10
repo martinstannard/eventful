@@ -39,7 +39,8 @@ type alias Model =
 init : Settings
 init =
     Settings
-        { url = "http://progression.coreos-staging.blakedev.com/api/v3/history/maths/my_lessons/"
+        -- { url = "http://progression.coreos-staging.blakedev.com/api/v3/history/maths/my_lessons/"
+        { url = "http://api.readingeggs.com/progress/api/v3/history/maths/my_lessons/"
         , mdl = Material.model
         }
 
@@ -83,7 +84,8 @@ endpoints : AllDict Endpoint String String
 endpoints =
     let
         stagingApi =
-            "http://progression.coreos-staging.blakedev.com/api/v3"
+            -- "http://progression.coreos-staging.blakedev.com/api/v3"
+            "http://api.readingeggs.com/progress/api/v3"
     in
         AllDict.fromList toString
             [ ( StagingHistory, stagingApi ++ "/history/maths/my_lessons/" )

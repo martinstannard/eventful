@@ -14,7 +14,8 @@ module Decoders.ProgressionHistoryV3 exposing (History, decoder, view)
              "precinct":"my_lessons",
              "lesson":5,
              "event_type":"ResetProgress",
-             "canonical_student_id":123
+             "canonical_student_id":123,
+             "created_at": "2016-11-10T08:49:49.639860",
           }
        }
     ]
@@ -77,6 +78,7 @@ type alias Event =
     { precinct : String
     , lesson : Int
     , event_type : String
+    , created_at: String
     , canonical_student_id : Int
     , activity : Int
     }
@@ -86,8 +88,9 @@ eventDecoder : JD.Decoder Event
 eventDecoder =
     JP.decode Event
         |> JP.required "precinct" JD.string
-        |> JP.required "lesson" JD.int
+        |> JP.optional "lesson" JD.int 0
         |> JP.required "event_type" JD.string
+        |> JP.required "created_at" JD.string
         |> JP.required "canonical_student_id" JD.int
         |> JP.optional "activity" JD.int 0
 
@@ -124,7 +127,8 @@ view (History models) =
     Table.table []
         [ Table.thead []
             [ Table.tr []
-                [ Table.th [] [ text "Precinct" ]
+                [ Table.th [] [ text "Created at" ]
+                , Table.th [] [ text "Precinct" ]
                 , Table.th [] [ text "Event Type" ]
                 , Table.th [] [ text "Lesson" ]
                 , Table.th [] [ text "Activity" ]
@@ -142,7 +146,8 @@ view (History models) =
 rowView : Model -> Html b
 rowView { event, progress } =
     Table.tr []
-        [ Table.td [] [ text event.precinct ]
+        [ Table.td [] [ text event.created_at ]
+        , Table.td [] [ text event.precinct ]
         , Table.td [] [ text event.event_type ]
         , Table.td [ Table.numeric ] [ text (toString event.lesson) ]
         , Table.td [ Table.numeric ] [ text (toString event.activity) ]
