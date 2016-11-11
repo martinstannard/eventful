@@ -126,9 +126,14 @@ progressDecoder =
 
 currentEvent : List Model -> Int -> List Model
 currentEvent models slider =
-    withDefault [] (get slider (fromList models))
+      models
+        |> Array.fromList
+        |> Array.get slider
+        |> Maybe.map (\x -> [ x ])
+        |> Maybe.withDefault []
+    -- withDefault [] (get slider (fromList models))
 
-view : History -> Int -> Html b
+view : History -> Float -> Html b
 view (History models) slider =
     Table.table []
         [ Table.thead []
@@ -146,7 +151,8 @@ view (History models) slider =
             ]
         , tbody []
             -- rowView (currentEvent models slider)
-            (List.map rowView models) -- (currentEvent (log "models" models) slider))
+            -- (List.map rowView models) -- (currentEvent (log "models" models) slider))
+            (List.map rowView (currentEvent (log "models" models) (round slider)))
         ]
 
 

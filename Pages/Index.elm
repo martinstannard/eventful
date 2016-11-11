@@ -12,6 +12,7 @@ import Pages.Settings as Settings exposing (Settings)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import String exposing (toInt)
 
 
 -- Material
@@ -53,7 +54,7 @@ init =
         { ehr = EHR.init History.view
         , mdl = Material.model
         , studentId = "123"
-        , slider = 100
+        , slider = 100.0
         }
 
 
@@ -130,6 +131,6 @@ view (Index model) =
               [ Slider.onChange SliderMsg
               , Slider.value model.slider
               ]
-            , h4 [] [text toString model.slider]
+            , h4 [] [text (toString model.slider)]
             , EHR.view model.ehr model.slider
             ]
