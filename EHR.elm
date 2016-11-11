@@ -30,7 +30,7 @@ type EHR a b
     = EHR
         { data : Maybe a
         , state : State
-        , viewFn : a -> Html b
+        , viewFn : a -> Float -> Html b
         }
 
 
@@ -46,7 +46,7 @@ type Msg a
     | FetchFail Http.Error
 
 
-init : (a -> Html b) -> EHR a b
+init : (a -> Float -> Html b) -> EHR a b
 init viewFn =
     EHR
         { data = Nothing
@@ -55,14 +55,14 @@ init viewFn =
         }
 
 
-view : EHR a b -> Html b
-view (EHR model) =
+view : EHR a b -> Float -> Html b
+view (EHR model) slider =
     case model.data of
         Nothing ->
             div [] []
 
         Just data ->
-            model.viewFn data
+            model.viewFn data slider
 
 
 data : EHR a b -> Maybe a

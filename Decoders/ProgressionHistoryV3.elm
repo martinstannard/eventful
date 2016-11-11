@@ -7,7 +7,7 @@ module Decoders.ProgressionHistoryV3 exposing (History, decoder, view)
           "progress":{
              "position":"5",
              "placement_test":false,
-             "map":1,
+            "map":1,
              "activity":1
           },
           "event":{
@@ -31,6 +31,8 @@ import Json.Decode.Pipeline as JP
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Array exposing (..)
+import Maybe exposing (withDefault)
 
 
 -- Material
@@ -44,6 +46,7 @@ import Material.Tabs as Tabs
 import Material.Options as Options exposing (css)
 import Material.Icon as Icon
 
+import Debug exposing (..)
 
 type History
     = History (List Model)
@@ -121,9 +124,12 @@ progressDecoder =
 -- View --
 ----------
 
+currentEvent : List Model -> Int -> List Model
+currentEvent models slider =
+    withDefault [] (get slider (fromList models))
 
-view : History -> Html b
-view (History models) =
+view : History -> Int -> Html b
+view (History models) slider =
     Table.table []
         [ Table.thead []
             [ Table.tr []
@@ -139,7 +145,8 @@ view (History models) =
                 ]
             ]
         , tbody []
-            (List.map rowView models)
+            -- rowView (currentEvent models slider)
+            (List.map rowView models) -- (currentEvent (log "models" models) slider))
         ]
 
 
@@ -156,3 +163,5 @@ rowView { event, progress } =
         , Table.td [ Table.numeric ] [ strong [] [ text (toString progress.activity) ] ]
         , Table.td [] [ strong [] [ text (toString progress.placement_test) ] ]
         ]
+
+

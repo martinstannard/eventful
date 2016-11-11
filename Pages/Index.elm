@@ -24,6 +24,7 @@ import Material.Table as Table
 import Material.Tabs as Tabs
 import Material.Options as Options exposing (css)
 import Material.Icon as Icon
+import Material.Slider as Slider
 
 
 type Index
@@ -34,6 +35,7 @@ type alias Model =
     { ehr : EHR History Msg
     , studentId : String
     , mdl : Material.Model
+    , slider : Float
     }
 
 
@@ -41,6 +43,7 @@ type Msg
     = GetQuanta String
     | EHRMsg (EHR.Msg History)
     | UpdateStudentId String
+    | SliderMsg Float
     | MDL (Material.Msg Msg)
 
 
@@ -50,6 +53,7 @@ init =
         { ehr = EHR.init History.view
         , mdl = Material.model
         , studentId = "123"
+        , slider = 100
         }
 
 
@@ -78,6 +82,9 @@ update msg settings (Index model) =
 
         UpdateStudentId id ->
             ( Index { model | studentId = id }, Cmd.none )
+
+        SliderMsg position ->
+            ( Index { model | slider = position }, Cmd.none )
 
         _ ->
             ( Index model, Cmd.none )
@@ -119,5 +126,10 @@ view (Index model) =
                 ]
                 [ text buttonText ]
             , br [] []
-            , (EHR.view model.ehr)
+            , Slider.view
+              [ Slider.onChange SliderMsg
+              , Slider.value model.slider
+              ]
+            , h4 [] [text toString model.slider]
+            , EHR.view model.ehr model.slider
             ]
