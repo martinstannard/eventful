@@ -1,0 +1,3 @@
+- Fix bug where current tab isn't indicated
+- Fix issue where URL doesn't update when changing tabs (/pages)
+- Add simple loading indicator to 'Get History' button

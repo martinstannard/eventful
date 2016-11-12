@@ -1,209 +1,200 @@
-module Main exposing (..)
+module Main exposing (main)
+
+import Navigation
+import Pages.Index as Index exposing (Index)
+import Pages.Settings as Settings exposing (Settings)
+import String
+import AllDict exposing (AllDict)
+
+
+-- Html
 
 import Html exposing (..)
-import Html.App exposing (..)
+import Html.App
 import Html.Attributes exposing (..)
-import Http
-import Json.Decode as Json exposing ((:=), string, int, bool, list)
-import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
-import Task
+
+
+-- Material
+
 import Material
 import Material.Scheme
 import Material.Textfield as Textfield
 import Material.Button as Button
 import Material.Table as Table
-import Material.Options exposing (css)
-import List exposing (reverse)
+import Material.Tabs as Tabs
+import Material.Options as Options exposing (css)
+import Material.Icon as Icon
+
+
+-- Main program
 
 
 main : Program Never
 main =
-    Html.App.program
-        { init = init
+    Navigation.program urlParser
+        { init = \url -> urlUpdate url init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , urlUpdate = urlUpdate
+        , subscriptions = \_ -> Sub.none
         }
 
 
-type Msg
-    = Noop
-    | GetEvents
-    | FetchSucceed (List Quanta)
-    | FetchFail Http.Error
-    | UpdateStudentId String
-    | MDL Material.Msg
 
-
-type alias Progress =
-    { position : String
-    , placement_test : Bool
-    , map : Int
-    , activity : Int
-    }
-
-
-type alias Event =
-    { precinct : String
-    , lesson : Int
-    , event_type : String
-    , canonical_student_id : Int
-    , activity : Int
-    }
-
-
-type alias Quanta =
-    { progress : Progress
-    , event : Event
-    }
+-- Model
 
 
 type alias Model =
-    { quantas : List Quanta
-    , studentId : String
+    { currentPage : Page
+    , settings : Settings
+    , index : Index
+    , tab : Int
     , mdl : Material.Model
     }
 
 
-initialModel : Model
-initialModel =
-    { quantas = []
-    , studentId = "1"
+type Msg
+    = SettingsMsg Settings.Msg
+    | IndexMsg Index.Msg
+    | SelectTab Int
+    | MDL (Material.Msg Msg)
+
+
+type Page
+    = Index
+    | Settings
+
+
+init : Model
+init =
+    { currentPage = Index
+    , index = Index.init
+    , settings = Settings.init
+    , tab = 0
     , mdl = Material.model
     }
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( initialModel
-    , Cmd.none
-    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetEvents ->
-            { model | quantas = [] } ! [ loadEvents model.studentId ]
+        IndexMsg msg ->
+            let
+                ( index_, indexCmds ) =
+                    Index.update msg model.settings model.index
+            in
+                ( { model | index = index_ }, Cmd.map IndexMsg indexCmds )
 
-        FetchSucceed quantas ->
-            ( { model | quantas = quantas }, Cmd.none )
+        SettingsMsg msg ->
+            ( { model | settings = Settings.update msg model.settings }, Cmd.none )
 
-        FetchFail error ->
-            ( model, Cmd.none )
+        SelectTab tab ->
+            let
+                updateTo page =
+                    ( { model | currentPage = Index, tab = tab }, Navigation.modifyUrl (toUrl page) )
+            in
+                case tab of
+                    0 ->
+                        updateTo Index
 
-        UpdateStudentId id ->
-            ( { model | studentId = id }, Cmd.none )
+                    1 ->
+                        updateTo Settings
+
+                    _ ->
+                        ( { model | currentPage = Index, tab = tab }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-subscriptions : a -> Sub Msg
-subscriptions thing =
-    Sub.none
-
-
-
--- VIEW
-
-
-type alias Mdl =
-    Material.Model
-
-
 view : Model -> Html Msg
-view model =
-    div [ style [ ( "padding", "2rem" ) ] ]
-        [ h4 [] [text "Eventful"]
-        , Textfield.render MDL
-            [ 0 ]
-            model.mdl
-            [ Textfield.label "Student Id"
-            , Textfield.floatingLabel
-            , Textfield.value model.studentId
-            , Textfield.onInput UpdateStudentId
-            ]
-        , Button.render MDL
-            [ 0 ]
-            model.mdl
-            [ Button.onClick GetEvents
-            , css "margin" "0 24px"
-            ]
-            [ text "Get History" ]
-        , br [] []
-        , quantaTable (reverse model.quantas)
+view ({ currentPage } as model) =
+    Tabs.render MDL
+        [ 0 ]
+        model.mdl
+        [ Tabs.ripple
+        , Tabs.onSelectTab SelectTab
+        , Tabs.activeTab model.tab
         ]
-        |> Material.Scheme.top
-
-
-quantaTable : List Quanta -> Html b
-quantaTable quantas =
-    Table.table []
-        [ Table.thead []
-            [ Table.tr []
-                [ Table.th [] [ text "Precinct" ]
-                , Table.th [] [ text "Event Type" ]
-                , Table.th [] [ text "Lesson" ]
-                , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Map" ]
-                , Table.th [] [ text "Position" ]
-                , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Placement Test" ]
-                ]
+        [ Tabs.label [ Options.center ]
+            [ Icon.i "info_outline"
+            , Options.span [ css "width" "4px" ] []
+            , text "Index"
             ]
-        , tbody []
-            (List.map quantaView quantas)
+        , Tabs.label [ Options.center ]
+            [ Icon.i "code"
+            , Options.span [ css "width" "4px" ] []
+            , text "Settings"
+            ]
         ]
+        [ viewPage model |> Material.Scheme.top ]
 
 
-quantaView : Quanta -> Html b
-quantaView quanta =
-    Table.tr []
-        [ Table.td [] [ text quanta.event.precinct ]
-        , Table.td [] [ text quanta.event.event_type ]
-        , Table.td [ Table.numeric ] [ text (toString quanta.event.lesson) ]
-        , Table.td [ Table.numeric ] [ text (toString quanta.event.activity) ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString quanta.progress.map) ] ]
-        , Table.td [] [ strong [] [ text quanta.progress.position ] ]
-        , Table.td [ Table.numeric ] [ strong [] [ text (toString quanta.progress.activity) ] ]
-        , Table.td [] [ strong [] [ text (toString quanta.progress.placement_test) ] ]
-        ]
+viewPage : Model -> Html Msg
+viewPage ({ currentPage } as model) =
+    case currentPage of
+        Index ->
+            Index.view model.index
+                |> Html.App.map IndexMsg
+
+        Settings ->
+            Settings.view model.settings
+                |> Html.App.map SettingsMsg
 
 
-loadEvents : String -> Cmd Msg
-loadEvents studentId =
+
+-- url stuff
+
+
+urlUpdate : String -> Model -> ( Model, Cmd Msg )
+urlUpdate url model =
     let
-        url =
-          "http://ex-seeds.coreos-staging.blakedev.com/api/v3/history/" ++ studentId
-
-        decoder =
-            Json.list decodeQuanta
+        changeToPage page =
+            ( { model | currentPage = page }, Cmd.none )
     in
-        Task.perform FetchFail FetchSucceed (Http.get decoder url)
+        url
+            |> (\x -> AllDict.get x routes)
+            |> Maybe.withDefault Index
+            |> changeToPage
 
 
-decodeProgress : Json.Decoder Progress
-decodeProgress =
-    decode Progress
-        |> JsonPipeline.required "position" string
-        |> JsonPipeline.required "placement_test" bool
-        |> JsonPipeline.required "map" int
-        |> JsonPipeline.required "activity" int
+fromUrl : String -> String
+fromUrl url =
+    String.dropLeft 2 url
 
 
-decodeEvent : Json.Decoder Event
-decodeEvent =
-    decode Event
-        |> JsonPipeline.required "precinct" string
-        |> JsonPipeline.required "lesson" int
-        |> JsonPipeline.required "event_type" string
-        |> JsonPipeline.required "canonical_student_id" int
-        |> JsonPipeline.optional "activity" int 0
+urlParser : Navigation.Parser String
+urlParser =
+    Navigation.makeParser (fromUrl << .hash)
 
 
-decodeQuanta : Json.Decoder Quanta
-decodeQuanta =
-    decode Quanta
-        |> JsonPipeline.required "progress" decodeProgress
-        |> JsonPipeline.required "event" decodeEvent
+toUrl : Page -> String
+toUrl page =
+    page
+        |> (\x -> AllDict.get x reverseRoutes)
+        |> Maybe.withDefault "index"
+        |> String.append "#/"
+
+
+routes : AllDict String Page String
+routes =
+    AllDict.fromList toString urlPagePairs
+
+
+reverseRoutes : AllDict Page String String
+reverseRoutes =
+    let
+        flip ( a, b ) =
+            ( b, a )
+    in
+        urlPagePairs
+            |> List.map flip
+            |> AllDict.fromList toString
+
+
+urlPagePairs : List ( String, Page )
+urlPagePairs =
+    [ ( "", Index )
+    , ( "index", Index )
+    , ( "settings", Settings )
+    ]
