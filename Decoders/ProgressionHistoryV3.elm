@@ -45,6 +45,9 @@ import Material.Table as Table
 import Material.Tabs as Tabs
 import Material.Options as Options exposing (css)
 import Material.Icon as Icon
+import Material.Card as Card
+import Material.Typography as Typography
+import Material.Color as Color
 
 import Debug exposing (..)
 
@@ -131,29 +134,31 @@ currentEvent models slider =
         |> Array.get slider
         |> Maybe.map (\x -> [ x ])
         |> Maybe.withDefault []
-    -- withDefault [] (get slider (fromList models))
 
 view : History -> Float -> Html b
 view (History models) slider =
-    Table.table []
-        [ Table.thead []
-            [ Table.tr []
-                [ Table.th [] [ text "Created at" ]
-                , Table.th [] [ text "Precinct" ]
-                , Table.th [] [ text "Event Type" ]
-                , Table.th [] [ text "Lesson" ]
-                , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Map" ]
-                , Table.th [] [ text "Position" ]
-                , Table.th [] [ text "Activity" ]
-                , Table.th [] [ text "Placement Test" ]
+    div []
+      [ div []
+        (List.map cardView (currentEvent (log "models" models) (round slider)))
+        ,
+        Table.table []
+            [ Table.thead []
+                [ Table.tr []
+                    [ Table.th [] [ text "Created at" ]
+                    , Table.th [] [ text "Precinct" ]
+                    , Table.th [] [ text "Event Type" ]
+                    , Table.th [] [ text "Lesson" ]
+                    , Table.th [] [ text "Activity" ]
+                    , Table.th [] [ text "Map" ]
+                    , Table.th [] [ text "Position" ]
+                    , Table.th [] [ text "Activity" ]
+                    , Table.th [] [ text "Placement Test" ]
+                    ]
                 ]
+            , tbody []
+                (List.map rowView models)
             ]
-        , tbody []
-            -- rowView (currentEvent models slider)
-            -- (List.map rowView models) -- (currentEvent (log "models" models) slider))
-            (List.map rowView (currentEvent (log "models" models) (round slider)))
-        ]
+       ]
 
 
 rowView : Model -> Html b
@@ -170,4 +175,38 @@ rowView { event, progress } =
         , Table.td [] [ strong [] [ text (toString progress.placement_test) ] ]
         ]
 
+cardView: Model -> Html b
+cardView { event, progress } =
+    Card.view
+        [ css "width" "50em" ]
+        [ Card.title
+          [ css "flex-direction" "column" ]
+          [ Card.head [ ] [ text event.event_type ]
+          , Card.subhead [ ] [ text event.created_at ]
+          , Options.div
+              [ css "padding" "2rem 2rem 0 2rem" ]
+              [ Options.span
+                  [ Typography.display1
+                  , Color.text Color.primary
+                  ]
+                  [ text ("Map: " ++ toString progress.map) ]
+              ]
+          , Options.div
+              [ css "padding" "2rem 2rem 0 2rem" ]
+              [ Options.span
+                  [ Typography.display2
+                  , Color.text Color.primary
+                  ]
+                  [ text ("Position: " ++ progress.position) ]
+              ]
+          , Options.div
+              [ css "padding" "2rem 2rem 0 2rem" ]
+              [ Options.span
+                  [ Typography.display2
+                  , Color.text Color.primary
+                  ]
+                  [ text ("Activity: " ++ toString progress.activity) ]
+              ]
+          ]]
 
+                 -- [ text ("Map: " ++ progress.map ++ " Lesson: " ++ progress.position ++ " Activity: " ++ progress.activity) ]
